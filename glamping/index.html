@@ -1,0 +1,684 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NY glamping land auction tracker</title><style>:root{--font-anthropic-sans:sans-serif;--font-anthropic-serif:serif;--cds-font-size-title:28px;--cds-font-size-heading:16px;--cds-font-size-caption:12px;--cds-font-weight-medium:500;--cds-gap-xs:4px;--cds-gap-sm:8px;--cds-gap-md:12px;--cds-gap-lg:20px;--cds-pad-xs:4px;--cds-pad-sm:8px;--cds-pad-lg:16px;--cds-radius:8px;--color-fg:#111;--color-bg:#f6f6f4;--color-fg-muted:#666;--color-panel:#fff;--color-border-line:#ddd;--color-ok:#15803d;--color-bad:#b91c1c;--cds-chart-grid:#e8e8e8;--cds-chart-axis:#aaa;--cds-chart-muted:#aaa;--cds-chart-reference:#555;--cds-surface-popover:#fff;--cds-border:#ccc}body{margin:16px;font-family:system-ui,sans-serif;background:#f6f6f4;font-size:14px}</style><script src="d3.min.js"></script><script src="data.js"></script><script>const CALC={};window.__err=[];
+window.onerror=(m)=>__err.push(String(m));
+window.dash={colors:['#2a78d6','#d97706','#16a34a','#9333ea','#888','#888','#888','#888'],
+ data:(id)=>{ if(DATA[id]) return {status:'ok',data:DATA[id]}; if(CALC[id]){return {status:'ok',data:CALC[id].fn(...CALC[id].inputs.map(i=>dash.data(i).data))}} return {status:'missing',data:[]}},
+ calc:(id,o)=>{CALC[id]=o}, onData:(f)=>{try{f()}catch(e){__err.push(e.stack)}}, params:()=>({}),setParams(){},resetParams(){},setLink(){},refresh(){}};
+</script></head><body><div id="dash-root"><style>
+.gl-wrap{position:relative;font-family:var(--font-anthropic-sans);font-variant-numeric:tabular-nums;display:flex;flex-direction:column;gap:var(--cds-gap-lg)}
+.gl-title{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);margin:0}
+.gl-take{color:var(--color-fg-muted);margin:var(--cds-gap-xs) 0 0}
+.gl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr));gap:var(--cds-gap-md)}
+.gl-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));gap:var(--cds-gap-md)}
+.gl-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);min-width:0}
+.gl-card h3{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0}
+.gl-note{color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);margin:var(--cds-gap-xs) 0 var(--cds-gap-md)}
+.gl-h2{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0 0 var(--cds-gap-sm)}
+.gl-big{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);margin-top:var(--cds-gap-xs)}
+.gl-cap{color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.gl-scroll{overflow:auto;max-height:32rem}
+.gl-table{border-collapse:collapse;width:100%;font-size:var(--cds-font-size-caption)}
+.gl-table th{position:sticky;top:0;background:var(--color-panel);text-align:left;color:var(--color-fg-muted);font-weight:var(--cds-font-weight-medium);white-space:nowrap}
+.gl-table th,.gl-table td{padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);vertical-align:top}
+.gl-table td.gl-num,.gl-table th.gl-num{text-align:right;white-space:nowrap}
+.gl-table td.gl-wide{min-width:14rem}
+.gl-pass{color:var(--color-ok)}.gl-fail{color:var(--color-bad)}
+.gl-dl{list-style:none;margin:0;padding:0}
+.gl-dl li{display:grid;grid-template-columns:6.5rem 1fr auto;gap:var(--cds-gap-sm);padding:var(--cds-pad-xs) 0;border-bottom:1px solid var(--color-border-line);font-size:var(--cds-font-size-caption)}
+.gl-past{opacity:.5}
+.gl-calbar{display:flex;align-items:center;gap:var(--cds-gap-sm);margin-bottom:var(--cds-gap-sm)}
+.gl-calbar b{font-weight:600;min-width:11rem;text-align:center}
+.gl-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;font-size:var(--cds-font-size-caption)}
+.gl-days>span{min-height:4.6rem;padding:3px 4px;border-radius:4px;color:var(--color-fg-muted);overflow:hidden;border:1px solid var(--color-border-line)}
+.gl-days>span em{font-style:normal;display:block}
+.gl-days>span.gl-dow{min-height:0;text-align:center;border:0}
+.gl-days>span.gl-ev{background:var(--color-bg-secondary,rgba(127,127,127,.12));color:inherit}
+.gl-days>span.gl-ev i{display:block;font-style:normal;font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.gl-days>span.gl-ev small{display:block;font-size:inherit;line-height:1.2;overflow-wrap:anywhere}
+.gl-days>span.gl-auc{border:2px solid currentColor}
+.gl-days>span.gl-now em{font-weight:700;text-decoration:underline}
+.gl-days>span.gl-gone{opacity:.45}
+@media (max-width:600px){.gl-days>span.gl-ev small{display:none}.gl-days>span{min-height:3rem}}
+.gl-fh{grid-column:1/-1;font-size:var(--cds-font-size-caption);font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--color-border-line);padding-bottom:2px;margin-top:var(--cds-gap-sm)}
+.gl-badge{display:flex;align-items:center;gap:var(--cds-gap-sm);margin:0 4rem var(--cds-gap-xs) 0;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.gl-badge .gl-grade{font-size:var(--cds-font-size-heading);padding:.1rem .5rem;color:inherit}
+.gl-bars{display:flex;flex-direction:column;gap:var(--cds-gap-xs)}
+.gl-bar{display:grid;grid-template-columns:minmax(6rem,11rem) 1fr 3.5rem;gap:var(--cds-gap-sm);align-items:center;font-size:var(--cds-font-size-caption)}
+.gl-bar>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gl-track{position:relative;height:1rem}
+.gl-fill{height:100%;border-radius:4px;min-width:2px}
+.gl-ref{position:absolute;top:-2px;bottom:-2px;width:0;border-left:1px dashed var(--cds-chart-reference)}
+.gl-val{text-align:right}
+.gl-tip{position:absolute;display:none;pointer-events:none;z-index:5;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);max-width:16rem}
+.gl-tip i{display:block;font-style:normal;color:var(--cds-text-secondary)}
+.gl-wrap a{color:inherit}
+.gl-chips{display:flex;flex-wrap:wrap;gap:var(--cds-gap-xs);margin-bottom:var(--cds-gap-md);align-items:center}
+.gl-chip{font:inherit;font-size:var(--cds-font-size-caption);padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-border-line);border-radius:999px;background:transparent;color:var(--color-fg-muted);cursor:pointer}
+.gl-grp td{padding:0;background:var(--color-bg-secondary,rgba(127,127,127,.1))}
+.gl-grp button{font:inherit;font-weight:600;width:100%;text-align:left;padding:var(--cds-pad-sm);background:transparent;border:0;color:inherit;cursor:pointer}
+.gl-chip[aria-pressed=true]{background:var(--color-fg);color:var(--color-bg);border-color:var(--color-fg)}
+.gl-sel{font:inherit;font-size:var(--cds-font-size-caption);padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);background:var(--color-panel);color:var(--color-fg)}
+.gl-grade{display:inline-block;min-width:1.4rem;text-align:center;font-weight:600;border-radius:4px;padding:0 .3rem}
+.gl-gA{background:var(--color-ok);color:var(--color-bg)}.gl-gB{border:1px solid var(--color-ok);color:var(--color-ok)}
+.gl-rules{margin:0;padding-left:1.1rem;font-size:var(--cds-font-size-caption);display:flex;flex-direction:column;gap:var(--cds-gap-xs)}
+.gl-chartbox{min-height:20rem}
+.gl-more>summary{cursor:pointer;font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);padding:var(--cds-pad-sm) 0;color:var(--color-fg-muted)}
+.gl-more[open]>summary{margin-bottom:var(--cds-gap-md);color:var(--color-fg)}
+.gl-more>section{margin-bottom:var(--cds-gap-lg)}
+.gl-toggle{display:inline-flex;align-items:center;gap:.35rem;cursor:pointer}
+.gl-toggle input{appearance:none;-webkit-appearance:none;width:.8rem;height:.8rem;border-radius:50%;border:2px solid var(--c);margin:0;cursor:pointer}
+.gl-toggle input:checked{background:var(--c)}
+.gl-toggle input:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.gl-photos{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm);margin:0 0 var(--cds-gap-md);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.gl-photos img{width:min(100%,20.5rem);height:auto;border-radius:var(--cds-radius);display:block}
+.gl-aucs{grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))}
+.gl-auc{font:inherit;text-align:left;color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:var(--cds-gap-xs);min-height:9.5rem}
+.gl-auc:hover{border-color:var(--color-fg)}
+.gl-auc.gl-soon{border:2px solid var(--color-fg)}
+.gl-auc-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--cds-gap-sm)}
+.gl-auc-foot{margin-top:auto;display:flex;gap:var(--cds-gap-sm);align-items:center;font-size:var(--cds-font-size-caption)}
+.gl-back{position:absolute;inset:0;background:rgba(0,0,0,.28);z-index:5}
+.gl-detail{position:absolute;left:50%;transform:translateX(-50%);width:min(100%,46rem);max-height:86vh;overflow:auto;box-sizing:border-box;z-index:6;background:var(--color-panel);border:1px solid var(--color-fg);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-lg)}
+.gl-detail h3{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0 2rem var(--cds-gap-sm) 0}
+.gl-detail h4{font-size:var(--cds-font-size-caption);font-weight:600;margin:var(--cds-gap-md) 0 var(--cds-gap-xs)}
+.gl-x{position:absolute;top:var(--cds-pad-sm);right:var(--cds-pad-sm);font:inherit;border:1px solid var(--color-border-line);border-radius:999px;background:transparent;color:var(--color-fg);cursor:pointer;padding:0 .55rem;line-height:1.6}
+.gl-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr));gap:var(--cds-gap-sm) var(--cds-gap-md)}
+.gl-facts div span{display:block;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.gl-checks{list-style:none;margin:0;padding:0;font-size:var(--cds-font-size-caption);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:var(--cds-gap-xs) var(--cds-gap-md)}
+.gl-detail p{font-size:var(--cds-font-size-caption);margin:var(--cds-gap-xs) 0 0}
+.gl-btn{display:inline-block;margin-top:var(--cds-gap-md);padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-fg);border-radius:var(--cds-radius);text-decoration:none;font-size:var(--cds-font-size-caption)}
+.gl-key{display:grid;grid-template-columns:auto 1fr;gap:var(--cds-gap-xs) var(--cds-gap-sm);font-size:var(--cds-font-size-caption);margin:0 0 var(--cds-gap-md);align-items:start}
+.gl-key b{white-space:nowrap}
+.gl-click tbody tr{cursor:pointer}.gl-click tbody tr:hover{background:var(--cds-chart-grid)}
+.gl-plist li{cursor:pointer}
+.gl-mapgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:var(--cds-gap-lg);align-items:start}
+.gl-map{max-width:34rem;min-height:20rem}
+.gl-map svg{display:block}
+.gl-legend{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm) var(--cds-gap-md);font-size:var(--cds-font-size-caption);margin-bottom:var(--cds-gap-md)}
+.gl-sw{display:inline-block;width:.65rem;height:.65rem;border-radius:50%;margin-right:.35rem}
+.gl-plist{list-style:none;margin:0;padding:0;font-size:var(--cds-font-size-caption);max-height:44rem;overflow:auto}
+.gl-plist li{padding:var(--cds-pad-xs) 0;border-bottom:1px solid var(--color-border-line)}
+[data-dash-source-state=refreshing]{opacity:.5}
+</style>
+<div class="gl-wrap">
+  <header>
+    <h1 class="gl-title">NY glamping land auction tracker</h1>
+    <p class="gl-take" id="takeaway" data-source="auctions lot_scores grade_summary">—</p>
+  </header>
+
+  <div class="gl-grid gl-aucs" id="headline" data-source="auctions lots lot_grades"></div>
+
+  <section id="map">
+    <h2 class="gl-h2">Map</h2>
+    <div class="gl-card"><h3>Where everything is</h3><p class="gl-note">Pins mark the town, not the exact parcel. Dashed rings are rough drive times from North Riverdale. Click anything for details.</p>
+      <div class="gl-legend" id="map-legend"></div>
+      <div class="gl-mapgrid"><div class="gl-map" id="map-chart" data-source="places ny_counties calendar"></div><ul class="gl-plist" id="map-list" data-source="places"></ul></div></div>
+  </section>
+
+  <section id="candidates">
+    <h2 class="gl-h2">Available now: auction lots and listings</h2>
+    <div class="gl-card"><h3>Everything you could buy today, on one scale</h3>
+      <p class="gl-note">Click a row for details. Price is the target bid for auction lots and the asking price for listings.</p>
+      <div class="gl-chips" id="avail-chips"></div>
+      <div class="gl-scroll"><table class="gl-table gl-click" id="avail-table" data-source="available" data-row-key="id"><thead><tr>
+        <th data-field="grade">Grade</th><th data-field="basis">Why</th><th data-field="source">Type</th><th data-field="name">Property</th><th data-field="county">County</th><th class="gl-num" data-field="acres">Acres</th><th class="gl-num" data-field="price">Price</th><th data-field="price_is">Price is</th><th class="gl-num" data-field="fmv" title="Full market value: the county's own estimate of what the property is worth, from the tax roll. Auction lots only.">County value</th><th class="gl-num" data-field="all_in">All-in with build</th><th class="gl-num" data-field="payback_seasons">Payback</th><th class="gl-num" data-field="drive_hours">Drive</th><th data-field="when">When</th><th data-field="notes">Notes</th></tr></thead><tbody></tbody></table></div></div>
+  </section>
+
+  <section id="auctions">
+    <h2 class="gl-h2">Auction deadlines</h2>
+    <div class="gl-card"><div id="cal-grid" data-source="deadlines"></div>
+        <details class="gl-more" style="margin-top:var(--cds-gap-md)"><summary>Same dates as a list</summary><ul class="gl-dl" id="deadlines" data-source="deadlines"></ul></details></div>
+  </section>
+
+  <section id="sales">
+    <h2 class="gl-h2">Past sales catalog, graded</h2>
+    <div class="gl-card" style="margin-top:var(--cds-gap-md)"><h3>Sold lots</h3><p class="gl-note">Land of 1+ acre, any waterfront land, and camps or cottages from NYSAuctions tax auctions, May 2023 to Sept 2026. Click a grade bar to open or close that group, a column to sort, or a row for details.</p>
+      <div class="gl-chips" id="sale-chips"></div>
+      <div class="gl-scroll"><table class="gl-table gl-click" id="sale-table" data-source="sales" data-row-key="id"><thead><tr>
+        <th data-source="sales_graded" data-field="grade">Grade</th><th data-source="sales_graded" data-field="basis">Why</th><th data-field="county">County</th><th data-field="date">Auction</th><th data-field="lot">Lot</th><th data-field="address">Address</th><th data-field="town">Town</th><th data-field="kind">Kind</th><th class="gl-num" data-field="acres">Acres</th><th data-field="water">Water</th><th class="gl-num" data-field="fmv" title="Full market value: the county's own estimate of what the property is worth, from the tax roll. Auction lots only.">County value</th><th class="gl-num" data-field="high_bid">High bid</th><th class="gl-num" data-source="sales_graded" data-field="pct_of_fmv">% of county value</th><th class="gl-num" data-source="sales_graded" data-field="price_per_acre">$ per acre</th><th class="gl-num" data-source="sales_graded" data-field="drive_hours">Drive</th><th data-field="flag">Flag</th></tr></thead><tbody></tbody></table></div>
+      <p class="gl-note" id="sale-count" style="margin:var(--cds-gap-sm) 0 0"></p></div>
+    <details class="gl-more"><summary>How the grades work, summary numbers and the price chart</summary>
+    <div class="gl-grid" style="margin-bottom:var(--cds-gap-md)">
+      <div class="gl-card"><div class="gl-cap">A lots (true gems)</div><div class="gl-big"><span id="s-a" data-source="grade_summary" data-field="lots" data-where="grade=A">—</span></div><div class="gl-cap" id="s-a-sub"></div></div>
+      <div class="gl-card"><div class="gl-cap">B lots (strong buys)</div><div class="gl-big"><span id="s-b" data-source="grade_summary" data-field="lots" data-where="grade=B">—</span></div><div class="gl-cap" id="s-b-sub"></div></div>
+      <div class="gl-card"><div class="gl-cap">Median A high bid</div><div class="gl-big"><span id="s-am" data-source="grade_summary" data-field="median_high_bid" data-where="grade=A">—</span></div><div class="gl-cap">What a gem has actually cost</div></div>
+      <div class="gl-card"><div class="gl-cap">Lots in the catalog</div><div class="gl-big"><span id="s-n" data-source="sales_totals" data-field="lots">—</span></div><div class="gl-cap" id="s-n-sub"></div></div>
+    </div>
+    <div class="gl-two">
+      <div class="gl-card"><h3>How lots are graded</h3><p class="gl-note">Same rules for past sales and for current candidates. Budget logic: $50K all-in with about $25K to build.</p>
+        <div class="gl-key">
+          <b><span class="gl-grade gl-gA">A</span> True gem</b><span>3+ acres for $30K or less, no warning notes, in the Catskills or Adirondacks, and it has a draw: water named in the listing, or it sits in a destination town (list below). A camp or cottage with either draw, 1+ acre and $50K or less also counts.</span>
+          <b><span class="gl-grade gl-gB">B</span> Strong buy</b><span>Has a draw but misses on size or price: water at any price up to $50K, or a destination town at $30K or less or with 3+ acres. Or pure value: dry land of 5+ acres for $25K or less and no more than 60% of FMV.</span>
+          <b>C Ordinary</b><span>Sold for $50K or less with no warning notes, but nothing special. The baseline to compare against.</span>
+          <b>Flagged</b><span>The listing warns it may lack road access or frontage, or is wetland or underwater. Usually cheap for a reason.</span>
+          <b>Over budget</b><span>Sold for more than $50K.</span>
+        </div>
+        <p class="gl-note">The Why column says what earned an A or B: Water, Location (destination town) or Value. Water is not required, but a view is not in the listings, so a great-view lot outside a destination town can still land at C. Terms: FMV is the county's full market value estimate. High bid is the winning bid when bidding closed. % of FMV is high bid divided by FMV.</p>
+        <p class="gl-note" style="margin-top:var(--cds-gap-md)">Limits: price is the high bid when bidding closed, not a confirmed closing. Water only counts when the listing names it; 2023 and 2024 Sullivan catalogs did not label water, so gems there may be under-counted. A view is not in the listings. Camp condition is unknown.</p>
+        <div class="gl-scroll"><table class="gl-table" id="grade-table" data-source="grade_summary" data-row-key="grade"><thead><tr><th data-field="grade">Grade</th><th class="gl-num" data-field="lots">Lots</th><th class="gl-num" data-field="median_high_bid">Median high bid</th><th class="gl-num" data-field="median_acres">Median acres</th><th class="gl-num" data-field="median_pct_of_fmv">Median % of FMV</th></tr></thead><tbody></tbody></table></div>
+        <h3 style="margin-top:var(--cds-gap-lg)">Destination towns</h3><p class="gl-note">Towns I am counting as a location draw: park and vacation areas people already travel to. This list is my judgment call; tell me which to add or drop.</p>
+        <div class="gl-scroll" style="max-height:14rem"><table class="gl-table" id="dest-table" data-source="destinations" data-row-key="county,town"><thead><tr><th data-field="region">Region</th><th data-field="county">County</th><th data-field="town">Town</th><th data-field="why">Why</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="gl-card"><h3>High bid vs acreage</h3><p class="gl-note">Each dot is a sold lot at $60K or less. The shaded box is the A zone: 3+ acres at $30K or less, for lots with water or a destination town. Hollow dots are flagged lots.</p>
+        <div class="gl-legend" id="sale-legend"></div>
+        <div class="gl-chartbox" id="sale-chart" data-source="sales sales_graded"></div></div>
+    </div>
+    </details>
+  </section>
+
+  <details class="gl-more" id="more"><summary>More: auction calendar, ROI model, rules and sources</summary>
+  <section id="calendar-sec">
+    <h2 class="gl-h2">Auction calendar</h2>
+    <div class="gl-two">
+      <div class="gl-card"><h3>Annual calendar</h3><p class="gl-note">When each county usually holds its sale and where 2026 stands.</p>
+        <div class="gl-scroll"><table class="gl-table" id="calendar" data-source="calendar" data-row-key="county"><thead><tr><th data-field="county">County</th><th data-field="typical_timing">Usually</th><th data-field="date_2026">2026</th><th data-field="status">Status</th><th data-field="auctioneer">Auctioneer</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="gl-card"><h3>Scheduled auctions</h3><p class="gl-note">Format, deposit and whether the lot list is posted. Click any row for a full roundup.</p>
+      <div class="gl-scroll"><table class="gl-table gl-click" id="auction-table" data-source="auctions" data-row-key="id"><thead><tr><th data-field="county">County</th><th data-field="date">Date</th><th data-field="format">Format</th><th data-field="location">Where</th><th data-field="deposit">Deposit</th><th data-field="lots_status">Lots</th><th data-field="url">Link</th></tr></thead><tbody></tbody></table></div></div>
+    </div>
+  </section>
+  <section id="roi">
+    <h2 class="gl-h2">ROI model</h2>
+    <div class="gl-two">
+      <div class="gl-card"><h3>Payback by lot, seasons after opening</h3><p class="gl-note">Reference lot types from the research, then current candidates with road access and no structure. Add about a year for permits and build.</p>
+        <div class="gl-bars" id="pay-chart" data-source="roi_types roi_candidates"></div></div>
+      <div class="gl-card"><h3>Payback and monthly average by lot</h3><p class="gl-note">2 tents, self-booked, 184-night season. Candidate land cost assumes the past dry-land pattern of 64% of FMV. Estimates, not guarantees.</p>
+        <div class="gl-scroll"><table class="gl-table" id="roi-table" data-source="roi_candidates roi_types"><thead><tr><th>Lot</th><th class="gl-num">Land</th><th class="gl-num">All-in</th><th class="gl-num">Year 1 net</th><th class="gl-num">Mature net</th><th class="gl-num">Monthly avg</th><th class="gl-num">Payback</th></tr></thead><tbody></tbody></table></div></div>
+    </div>
+    <div class="gl-card" style="margin-top:var(--cds-gap-md)"><h3>Model assumptions</h3><p class="gl-note">Net income by lot kind. The water-lot nightly rate is an assumption.</p>
+      <div class="gl-scroll"><table class="gl-table" id="model-table" data-source="model" data-row-key="kind"><thead><tr><th data-field="kind">Kind</th><th class="gl-num" data-field="nightly_rate">Nightly</th><th class="gl-num" data-field="build_cost">Build</th><th class="gl-num" data-field="year1_occupancy">Year 1 occ.</th><th class="gl-num" data-field="mature_occupancy">Mature occ.</th><th class="gl-num" data-field="year1_net">Year 1 net</th><th class="gl-num" data-field="mature_net">Mature net</th><th class="gl-num" data-field="monthly_avg">Monthly avg</th></tr></thead><tbody></tbody></table></div></div>
+  </section>
+  <section id="rules">
+    <h2 class="gl-h2">Rules, money and sources</h2>
+    <div class="gl-two">
+      <div class="gl-card"><h3>Goal, APA gate, auction money, financing</h3><p class="gl-note">Auction money terms are the general tax auction terms from the notes; check each auction's own posted terms.</p>
+        <div class="gl-scroll"><table class="gl-table" id="ref-table" data-source="reference" data-row-key="id"><thead><tr><th data-field="section">Area</th><th data-field="item">Item</th><th data-field="detail">Detail</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="gl-card"><h3>Sites</h3><p class="gl-note">Auction houses by county, the APA map, and listing sites. Skip landfirstny.com (Tug Hill, not Adirondacks).</p>
+        <div class="gl-scroll"><table class="gl-table" id="site-table" data-source="sites" data-row-key="name"><thead><tr><th data-field="name">Site</th><th data-field="kind">Kind</th><th data-field="covers">Covers</th><th data-field="url">Link</th></tr></thead><tbody></tbody></table></div></div>
+    </div>
+  </section>
+  </details>
+  <div class="gl-tip" id="tip"></div>
+</div>
+<script>
+dash.calc('lot_scores', {
+  inputs: ['lots'], title: 'North Star score by lot',
+  description: 'One point per North Star criterion met; target bid is the lower of $30K and 60% of FMV.',
+  fn: (lots) => lots.map((l) => {
+    const c = {
+      acres_3plus: Number(l.acres) >= 3,
+      waterfront: l.water_in_description === 'yes',
+      access: l.access === 'ok',
+      price: 0.6 * Number(l.fmv) <= 30000,
+      tourist_county: ['Sullivan', 'Essex'].includes(l.county),
+    };
+    const out = { id: l.id, score: Object.values(c).filter(Boolean).length, target_bid: Math.min(30000, Math.round(0.6 * Number(l.fmv))) };
+    for (const k in c) out[k] = c[k] ? 'Pass' : 'Fail';
+    return out;
+  }),
+});
+dash.calc('sales_graded', {
+  inputs: ['sales', 'destinations', 'ny_counties'], title: 'Past sales, graded',
+  description: 'Grade A, B, C, Flagged or Over budget for each sold lot, what earned it (water, location or value), high bid as a share of FMV and per acre, and an estimated drive time from North Riverdale to the middle of the county.',
+  fn: (sales, destinations, ny_counties) => {
+    const drive = (lat, lon) => { if (lat == null || lon == null) return null; const mi = Math.hypot((Number(lat) - 40.9) * 69, (Number(lon) + 73.91) * 69 * Math.cos(42 * Math.PI / 180)); return Math.round((mi * 1.18 / 57) * 2) / 2; };
+    const cc = new Map(ny_counties.map((c) => [c.county, c]));
+    const dest = new Set(destinations.map((d) => d.county + '|' + d.town));
+    return sales.map((r) => {
+      const bid = Number(r.high_bid), ac = Number(r.acres), fmv = Number(r.fmv) || 0, water = !!r.water, loc = dest.has(r.county + '|' + r.town);
+      let grade = 'C', basis = '';
+      if (r.flag) grade = 'Flagged';
+      else if (bid > 50000) grade = 'Over budget';
+      else if (r.kind === 'Land') {
+        if (ac < 1) grade = 'C';
+        else if (ac >= 3 && bid <= 30000 && r.region !== 'Other' && (water || loc)) { grade = 'A'; basis = water ? 'Water' : 'Location'; }
+        else if (water) { grade = 'B'; basis = 'Water'; }
+        else if (loc && (bid <= 30000 || ac >= 3)) { grade = 'B'; basis = 'Location'; }
+        else if (ac >= 5 && bid <= 25000 && fmv > 0 && bid <= 0.6 * fmv) { grade = 'B'; basis = 'Value'; }
+      } else {
+        if (ac >= 1 && (water || loc)) { grade = 'A'; basis = water ? 'Water' : 'Location'; }
+        else if (water) { grade = 'B'; basis = 'Water'; }
+        else if (loc) { grade = 'B'; basis = 'Location'; }
+        else if (ac >= 3 && bid <= 30000) { grade = 'B'; basis = 'Value'; }
+      }
+      return { id: r.id, grade, basis, destination_town: loc ? 'Yes' : 'No', drive_hours: cc.has(r.county) ? drive(cc.get(r.county).label_lat, cc.get(r.county).label_lon) : null, pct_of_fmv: fmv > 0 ? Math.round((bid / fmv) * 1000) / 1000 : null, price_per_acre: ac > 0 ? Math.round(bid / ac) : null };
+    });
+  },
+});
+dash.calc('grade_summary', {
+  inputs: ['sales', 'sales_graded'], title: 'Summary by grade',
+  description: 'Lot count and medians of high bid, acres and share of FMV for each grade.',
+  fn: (sales, sales_graded) => {
+    const g = new Map(sales_graded.map((x) => [x.id, x]));
+    const med = (a) => { a = a.filter((v) => v != null).sort((x, y) => x - y); return a.length ? a[Math.floor((a.length - 1) / 2)] : null; };
+    return ['A', 'B', 'C', 'Flagged', 'Over budget'].map((grade) => {
+      const rs = sales.filter((r) => g.get(r.id).grade === grade);
+      return { grade, lots: rs.length, median_high_bid: med(rs.map((r) => Number(r.high_bid))), median_acres: med(rs.map((r) => Number(r.acres))), median_pct_of_fmv: med(rs.map((r) => g.get(r.id).pct_of_fmv)) };
+    });
+  },
+});
+dash.calc('sales_totals', {
+  inputs: ['sales'], title: 'Catalog size', description: 'Number of sold lots, auctions and the date range in the catalog.',
+  fn: (sales) => ({ lots: sales.length, auctions: new Set(sales.map((r) => r.county + r.date)).size, first: sales.map((r) => r.date).sort()[0], last: sales.map((r) => r.date).sort().pop() }),
+});
+dash.calc('available', {
+  inputs: ['lots', 'listings', 'destinations', 'model', 'places'], title: 'Available now, graded',
+  description: 'Auction lots at their target bid and listings at their asking price, graded with the past-sales rules, with all-in cost and payback from the two-tent model, and an estimated drive time from North Riverdale (straight-line miles x 1.18 at 57 mph, to the nearest half hour).',
+  fn: (lots, listings, destinations, model, places) => {
+    const drive = (lat, lon) => { if (lat == null || lon == null) return null; const mi = Math.hypot((Number(lat) - 40.9) * 69, (Number(lon) + 73.91) * 69 * Math.cos(42 * Math.PI / 180)); return Math.round((mi * 1.18 / 57) * 2) / 2; };
+    const pinOf = (kind, id) => places.find((p) => (p.ref || '').startsWith(kind + ':') && p.ref.slice(kind.length + 1).split(',').includes(id));
+    const dest = new Set(destinations.map((d) => d.county + '|' + d.town)), ord = { A: 0, B: 1, C: 2, Flagged: 3, 'Over budget': 4 };
+    const mk = (o) => {
+      const loc = dest.has(o.county + '|' + o.town); let grade = 'C', basis = '';
+      if (o.flag) grade = 'Flagged';
+      else if (o.over) grade = 'Over budget';
+      else if (o.structure) { if (o.acres >= 1 && (o.water || loc)) { grade = 'A'; basis = o.water ? 'Water' : 'Location'; } else if (o.water || loc) { grade = 'B'; basis = o.water ? 'Water' : 'Location'; } else if (o.acres >= 3 && o.price <= 30000) { grade = 'B'; basis = 'Value'; } }
+      else if (o.acres < 1) grade = 'C';
+      else if (o.acres >= 3 && o.price <= 30000 && (o.water || loc)) { grade = 'A'; basis = o.water ? 'Water' : 'Location'; }
+      else if (o.water) { grade = 'B'; basis = 'Water'; }
+      else if (loc && (o.price <= 30000 || o.acres >= 3)) { grade = 'B'; basis = 'Location'; }
+      else if (o.acres >= 5 && o.price <= 25000 && (o.fmv == null || o.price <= 0.6 * o.fmv)) { grade = 'B'; basis = 'Value'; }
+      const m = model.find((x) => x.kind === (o.water ? 'water' : 'dry')), ok = grade !== 'Flagged' && grade !== 'Over budget' && !o.structure;
+      const all_in = ok ? o.price + Number(m.build_cost) : null;
+      const pb = ok ? Math.round((all_in <= Number(m.year1_net) ? all_in / Number(m.year1_net) : 1 + (all_in - Number(m.year1_net)) / Number(m.mature_net)) * 10) / 10 : null;
+      return { id: o.id, source: o.source, name: o.name, county: o.county, town: o.town, acres: o.acres, price: o.price, price_is: o.price_is, fmv: o.fmv, grade, basis, destination_town: loc ? 'Yes' : 'No', all_in, payback_seasons: pb, drive_hours: o.pin ? drive(o.pin.lat, o.pin.lon) : null, when: o.when, notes: o.notes };
+    };
+    const a = lots.map((l) => mk({ id: l.id, source: 'Auction lot', name: l.lot + ', ' + l.location, county: l.county, town: l.town, acres: Number(l.acres), price: Math.min(30000, Math.round(0.6 * Number(l.fmv))), price_is: 'Target bid', fmv: Number(l.fmv), water: l.water_in_description === 'yes', flag: l.access !== 'ok', over: 0.6 * Number(l.fmv) > 50000, structure: l.structure !== 'none', pin: pinOf('lot', l.id), when: 'Auction ' + l.auction_date, notes: l.notes }));
+    const b = listings.map((l) => mk({ id: l.id, source: 'Listing', name: l.property, county: l.county, town: l.town, acres: Number(l.acres), price: Number(l.price), price_is: 'Asking price', fmv: null, water: !!l.water, flag: !!l.flag, over: Number(l.price) > 50000, structure: false, pin: pinOf('listing', l.id), when: 'Listed, found ' + (l.found || 'Sept 2026'), notes: l.notes }));
+    return a.concat(b).sort((x, y) => ord[x.grade] - ord[y.grade] || x.price - y.price);
+  },
+});
+dash.calc('lot_grades', {
+  inputs: ['lots', 'destinations'], title: 'Candidate grade at target bid',
+  description: 'The past-sales grade each current lot would earn if won at its target bid (lower of $30K and 60% of FMV), and what earns it.',
+  fn: (lots, destinations) => {
+    const dest = new Set(destinations.map((d) => d.county + '|' + d.town));
+    return lots.map((l) => {
+      const fmv = Number(l.fmv), bid = Math.min(30000, Math.round(0.6 * fmv)), ac = Number(l.acres), water = l.water_in_description === 'yes', loc = dest.has(l.county + '|' + l.town);
+      let g = 'C', basis = '';
+      if (l.access !== 'ok') g = 'Flagged';
+      else if (0.6 * fmv > 50000) g = 'Over budget';
+      else if (l.structure === 'none') {
+        if (ac < 1) g = 'C';
+        else if (ac >= 3 && bid <= 30000 && (water || loc)) { g = 'A'; basis = water ? 'Water' : 'Location'; }
+        else if (water) { g = 'B'; basis = 'Water'; }
+        else if (loc) { g = 'B'; basis = 'Location'; }
+        else if (ac >= 5 && bid <= 25000 && bid <= 0.6 * fmv) { g = 'B'; basis = 'Value'; }
+      } else if (ac >= 1 && (water || loc)) { g = 'A'; basis = water ? 'Water' : 'Location'; }
+      else if (water || loc) { g = 'B'; basis = water ? 'Water' : 'Location'; }
+      else if (ac >= 3 && bid <= 30000) { g = 'B'; basis = 'Value'; }
+      return { id: l.id, grade_at_target: g, basis, destination_town: loc ? 'Yes' : 'No' };
+    });
+  },
+});
+dash.calc('roi_candidates', {
+  inputs: ['lots', 'model'], title: 'Candidate lot payback',
+  description: 'Land at the model share of FMV plus build cost, paid back by year 1 net and then mature net; only lots with road access and no structure.',
+  fn: (lots, model) => lots.filter((l) => l.access === 'ok' && l.structure === 'none').map((l) => {
+    const m = model.find((r) => r.kind === (l.water_in_description === 'yes' ? 'water' : 'dry'));
+    const land = Math.round(Number(m.land_pct_of_fmv) * Number(l.fmv));
+    const all_in = land + Number(m.build_cost);
+    const y1 = Number(m.year1_net), mat = Number(m.mature_net);
+    const payback_seasons = all_in <= y1 ? all_in / y1 : 1 + (all_in - y1) / mat;
+    return { id: l.id, label: l.lot + ', ' + l.town, land_cost: land, all_in, year1_net: y1, mature_net: mat, monthly_avg: Number(m.monthly_avg), payback_seasons: Math.round(payback_seasons * 10) / 10 };
+  }),
+});
+
+const $ = (id) => document.getElementById(id);
+const usd = (v) => (v == null || v === '' ? '' : '$' + d3.format(',')(Math.round(Number(v))));
+const pct = d3.format('.0%');
+const day = (s) => new Date(s + 'T00:00:00Z');
+const fmtDay = d3.utcFormat('%a %b %-d');
+const rows = (id) => { const r = dash.data(id); return r.status === 'ok' ? r.data : []; };
+const tip = $('tip'), wrap = document.querySelector('.gl-wrap');
+function hover(el, head, lines) {
+  el.addEventListener('mousemove', (e) => {
+    tip.replaceChildren();
+    const h = document.createElement('i'); h.textContent = head; tip.append(h);
+    lines.forEach((t) => { const d = document.createElement('div'); d.textContent = t; tip.append(d); });
+    tip.style.display = 'block';
+    const b = wrap.getBoundingClientRect();
+    const x = Math.min(e.clientX - b.left + 12, b.width - tip.offsetWidth - 4);
+    tip.style.left = Math.max(0, x) + 'px'; tip.style.top = (e.clientY - b.top + 14) + 'px';
+  });
+  el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+}
+function fillTable(id, data, key, cells, onRow) {
+  const body = $(id).querySelector('tbody'); body.replaceChildren();
+  data.forEach((r) => {
+    const tr = document.createElement('tr'); if (key) tr.dataset.key = r[key];
+    if (onRow) tr.addEventListener('click', () => onRow(r, tr));
+    cells(r).forEach((c) => {
+      const td = document.createElement('td');
+      if (c && c.node) td.append(c.node); else td.textContent = c && c.t !== undefined ? c.t : (c ?? '');
+      if (c && c.cls) td.className = c.cls;
+      tr.append(td);
+    });
+    body.append(tr);
+  });
+}
+function closeDetail() { state.pending = null; const o = $('gl-detail'), b = $('gl-back'); if (o) o.remove(); if (b) b.remove(); }
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDetail(); });
+function detail(anchor, title, facts, checks, notes, link, extra, media, badge) {
+  closeDetail();
+  const back = document.createElement('div'); back.id = 'gl-back'; back.className = 'gl-back'; back.addEventListener('click', closeDetail);
+  const d = document.createElement('div'); d.id = 'gl-detail'; d.className = 'gl-detail'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', title);
+  const wb = wrap.getBoundingClientRect(); d.style.top = Math.max(8, 24 - wb.top) + 'px';
+  const x = document.createElement('button'); x.className = 'gl-x'; x.type = 'button'; x.textContent = 'Close'; x.addEventListener('click', closeDetail);
+  const h3 = document.createElement('h3'); h3.textContent = title; d.append(x);
+  if (badge && badge[0]) { const bw = document.createElement('div'); bw.className = 'gl-badge'; const bt = document.createElement('span'); bt.textContent = (badge[0] === 'A' ? 'True gem' : badge[0] === 'B' ? 'Strong buy' : badge[0] === 'C' ? 'Ordinary' : '') + (badge[1] ? (badge[0].length === 1 ? ', for ' : '') + badge[1].toLowerCase() : '') + (badge[2] || ''); const gc = gcell(badge[0]).node; if (!gc.className) gc.className = 'gl-grade'; bw.append(gc, bt); d.append(bw); }
+  d.append(h3);
+  if (media) d.append(media);
+  const f = document.createElement('div'); f.className = 'gl-facts';
+  facts.filter((p) => p[1] !== '' && p[1] != null).forEach(([k, v]) => { const c = document.createElement('div'); if (k === '#') { c.className = 'gl-fh'; c.textContent = v; f.append(c); return; } const s = document.createElement('span'); s.textContent = k; c.append(s, String(v)); f.append(c); });
+  d.append(f);
+  (checks || []).forEach(([head, items]) => { if (!items.length) return; const h4 = document.createElement('h4'); h4.textContent = head; const ul = document.createElement('ul'); ul.className = 'gl-checks';
+    items.forEach(([label, ok]) => { const li = document.createElement('li'); const m = document.createElement('b'); m.textContent = ok === null ? '' : ok ? 'Yes  ' : 'No  '; m.className = ok ? 'gl-pass' : 'gl-fail'; li.append(m, label); ul.append(li); }); d.append(h4, ul); });
+  (notes || []).filter(Boolean).forEach((t) => { const p = document.createElement('p'); p.textContent = t; d.append(p); });
+  if (extra) d.append(extra);
+  if (link && /^https:\/\//.test(link[1] || '')) { const a = document.createElement('a'); a.className = 'gl-btn'; a.href = link[1]; a.target = '_blank'; a.rel = 'noopener'; a.textContent = link[0]; d.append(a); }
+  wrap.append(back, d);
+}
+const payback = (allIn, m) => (m ? Math.round((allIn <= Number(m.year1_net) ? allIn / Number(m.year1_net) : 1 + (allIn - Number(m.year1_net)) / Number(m.mature_net)) * 10) / 10 : null);
+const hrs = (v) => (v == null ? '' : v + ' hr');
+const num = (t) => ({ t, cls: 'gl-num' });
+const lotLink = (r) => { if (!/^https:\/\/aarauctions\.com\//.test(r.lot_url || '')) return r.address; const a = document.createElement('a'); a.href = r.lot_url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = r.address || 'Open lot'; a.addEventListener('click', (e) => e.stopPropagation()); return { node: a }; };
+const gcell = (g) => { const s = document.createElement('span'); s.textContent = g || ''; if (g === 'A' || g === 'B') s.className = 'gl-grade gl-g' + g; return { node: s }; };
+const pf = (t) => ({ t, cls: t === 'Pass' ? 'gl-pass' : 'gl-fail' });
+function bars(id, items, max, ref) {
+  const box = $(id); box.replaceChildren();
+  items.forEach((it) => {
+    const row = document.createElement('div'); row.className = 'gl-bar';
+    const a = document.createElement('span'); a.textContent = it.label;
+    const tr = document.createElement('div'); tr.className = 'gl-track';
+    const f = document.createElement('div'); f.className = 'gl-fill';
+    f.style.width = Math.max(0, Math.min(100, (it.value / max) * 100)) + '%'; f.style.background = it.color;
+    tr.append(f);
+    if (ref != null) { const r = document.createElement('div'); r.className = 'gl-ref'; r.style.left = (ref / max) * 100 + '%'; tr.append(r); }
+    const v = document.createElement('span'); v.className = 'gl-val'; v.textContent = it.text;
+    row.append(a, tr, v); hover(row, it.label, it.tip); box.append(row);
+  });
+}
+
+const state = { grades: new Set(['A']), region: 'All', sort: null, dir: 1, pending: null, past: false, cal: null, av: { sort: null, dir: 1, off: new Set(), type: 'All' } };
+const draw = () => {
+  const auctions = rows('auctions').slice().sort((a, b) => a.date.localeCompare(b.date));
+  const deadlines = rows('deadlines').slice().sort((a, b) => a.date.localeCompare(b.date));
+  const calendar = rows('calendar'), lots = rows('lots'), sales = rows('sales'), model = rows('model'), types = rows('roi_types');
+  rows('lot_photos'); rows('listing_photos'); const scores = rows('lot_scores'), graded = rows('sales_graded'), gsum = rows('grade_summary'), lgr = rows('lot_grades'), cands = rows('roi_candidates');
+  const today = new Date().toISOString().slice(0, 10);
+  const daysTo = (d) => Math.round((day(d) - day(today)) / 864e5);
+  const when = (d) => { const n = daysTo(d); return n < 0 ? 'past' : n === 0 ? 'today' : 'in ' + n + (n === 1 ? ' day' : ' days'); };
+
+  // headline: one card per upcoming auction
+  const next = auctions.find((a) => a.date >= today);
+  const sById = new Map(scores.map((s) => [s.id, s]));
+  const ranked = lots.filter((l) => sById.has(l.id)).sort((a, b) => sById.get(b.id).score - sById.get(a.id).score || (sById.get(b.id).access === 'Pass') - (sById.get(a.id).access === 'Pass') || Number(b.acres) - Number(a.acres));
+  const top = ranked[0];
+  const gOrder = { A: 0, B: 1, C: 2, Flagged: 3, 'Over budget': 4 }, lgAll = new Map(lgr.map((x) => [x.id, x]));
+  const byGrade = (ls) => ls.slice().sort((a, b) => gOrder[(lgAll.get(a.id) || {}).grade_at_target] - gOrder[(lgAll.get(b.id) || {}).grade_at_target] || Number(b.acres) - Number(a.acres));
+  const head = $('headline'); head.replaceChildren();
+  auctions.filter((a) => a.date >= today).forEach((a, i) => {
+    const mine = byGrade(lots.filter((l) => l.county === a.county)), best = mine[0], bg = best ? (lgAll.get(best.id) || {}).grade_at_target : '';
+    const c = document.createElement('button'); c.type = 'button'; c.className = 'gl-card gl-auc' + (i === 0 ? ' gl-soon' : '');
+    const t = document.createElement('div'); t.className = 'gl-auc-top'; const nm = document.createElement('b'), dt = document.createElement('span'); nm.textContent = a.county + ' County'; dt.className = 'gl-cap'; dt.textContent = fmtDay(day(a.date)); t.append(nm, dt);
+    const n = daysTo(a.date), big = document.createElement('div'); big.className = 'gl-big'; big.textContent = n === 0 ? 'Today' : n + (n === 1 ? ' day' : ' days');
+    const f = document.createElement('div'); f.className = 'gl-cap'; f.textContent = a.format;
+    const foot = document.createElement('div'); foot.className = 'gl-auc-foot';
+    if (best) { foot.append(gcell(bg).node, 'Best: ' + best.lot + ', ' + best.town + '. ' + mine.length + ' lots tracked.'); } else { foot.textContent = a.lots_status; foot.style.color = 'var(--color-fg-muted)'; }
+    c.append(t, big, f, foot); c.addEventListener('click', () => openAuction(a, c)); head.append(c);
+  });
+  const gs0 = Object.fromEntries(gsum.map((x) => [x.grade, x.lots]));
+  const full = scores.filter((s) => s.score === 5).length;
+  $('takeaway').textContent = next && top
+    ? 'Next up is ' + next.county + ' County on ' + fmtDay(day(next.date)) + ' (' + when(next.date) + '). ' + (full ? full + ' current lot' + (full > 1 ? 's meet' : ' meets') + ' all five North Star criteria.' : 'No current lot meets all five North Star criteria; ' + top.lot + ' in ' + top.town + ' leads at ' + sById.get(top.id).score + ' of 5.') + (gs0.A ? ' Past sales baseline: ' + gs0.A + ' A-grade and ' + gs0.B + ' B-grade lots since 2023.' : '')
+    : '—';
+
+  // map
+  (() => {
+    const places = rows('places'), counties = rows('ny_counties'), box = $('map-chart');
+    box.replaceChildren(); $('map-list').replaceChildren(); $('map-legend').replaceChildren();
+    if (!places.length || !counties.length) return;
+    const kinds = ['Candidate lot', 'Auction', 'Listing', 'Comp', 'City'];
+    const col = (k) => (k === 'City' ? 'var(--color-fg)' : dash.colors[kinds.indexOf(k)]);
+    const tracked = new Set(calendar.map((c) => c.county));
+    const L0 = -76.4, L1 = -73.2, B0 = 40.45, B1 = 45.1, K = 200, kx = Math.cos(42.8 * Math.PI / 180);
+    const X = (lon) => (Number(lon) - L0) * kx * K, Y = (lat) => (B1 - Number(lat)) * K;
+    const W = X(L1), H = Y(B0);
+    const svg = d3.select(box).append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', '100%');
+    const g = svg.append('g');
+    counties.forEach((c) => {
+      const d = c.rings.split(';').map((r) => 'M' + r.split(' ').map((p) => { const q = p.split(','); return X(q[0]).toFixed(1) + ',' + Y(q[1]).toFixed(1); }).join('L') + 'Z').join('');
+      g.append('path').attr('d', d).attr('fill', tracked.has(c.county) ? 'var(--cds-chart-grid)' : 'none').attr('stroke', 'var(--cds-chart-axis)').attr('stroke-width', 0.8);
+    });
+    counties.forEach((c) => { if (tracked.has(c.county) && c.label_lon > L0 + 0.1) g.append('text').attr('x', X(c.label_lon)).attr('y', Y(c.label_lat)).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').attr('letter-spacing', 1).text(c.county.toUpperCase()); });
+    const hx = X(-73.91), hy = Y(40.9);
+    [2, 3, 4, 5].forEach((hr) => { const rr = (hr * 57 / 1.18) * (K / 69);
+      g.append('circle').attr('cx', hx).attr('cy', hy).attr('r', rr).attr('fill', 'none').attr('stroke', 'var(--cds-chart-axis)').attr('stroke-width', 1).attr('stroke-dasharray', '3 5');
+      const rk = (57 / 1.18) * (K / 69), x2 = hx - 2 * rk * 0.72, x5 = Math.max(26, hx - 5 * rk * 0.97), lx = x2 + (x5 - x2) * (hr - 2) / 3, ly = hy - Math.sqrt(Math.max(0, rr * rr - (hx - lx) * (hx - lx)));
+      g.append('text').attr('x', lx).attr('y', ly - 5).attr('text-anchor', 'middle').attr('font-size', 11).attr('font-weight', 600).attr('fill', 'var(--color-fg-muted)').attr('stroke', 'var(--color-panel)').attr('stroke-width', 3).attr('paint-order', 'stroke').text(hr + ' hr'); });
+    const avG = new Map(rows('available').map((x) => [x.id, x.grade])), gG = new Map(graded.map((x) => [x.id, x.grade]));
+    const gemA = (p) => { const [k, key] = (p.ref || '').split(':'); if (k === 'lot' || k === 'listing') return key.split(',').some((id) => avG.get(id) === 'A') ? 1 : 0; if (k === 'town') return sales.filter((r) => r.town === key && gG.get(r.id) === 'A').length; return 0; };
+    const zi = (k) => (k === 'Auction' ? 9 : 4 - kinds.indexOf(k));
+    const order = places.filter((p) => state.past || p.kind !== 'Comp').sort((a, b) => zi(a.kind) - zi(b.kind));
+    order.forEach((p) => {
+      const city = p.kind === 'City', big = p.kind === 'Candidate lot' || p.kind === 'Auction';
+      const auc = p.kind === 'Auction';
+      const m = city ? g.append('rect').attr('x', X(p.lon) - 4).attr('y', Y(p.lat) - 4).attr('width', 8).attr('height', 8) : auc ? g.append('rect').attr('x', X(p.lon) - 4.5).attr('y', Y(p.lat) - 4.5).attr('width', 9).attr('height', 9).attr('transform', 'rotate(45 ' + X(p.lon) + ' ' + Y(p.lat) + ')') : g.append('circle').attr('cx', X(p.lon)).attr('cy', Y(p.lat)).attr('r', big ? 7 : 5.5);
+      m.attr('fill', col(p.kind)).attr('stroke', 'var(--color-panel)').attr('stroke-width', 1.5);
+      const lft = X(p.lon) > W - 170;
+      if (auc) g.append('text').attr('x', X(p.lon) + (lft ? -10 : 10)).attr('text-anchor', lft ? 'end' : 'start').attr('y', Y(p.lat) + 4).attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').attr('stroke', 'var(--color-panel)').attr('stroke-width', 3).attr('paint-order', 'stroke').text(p.label.split(',')[0].replace(' (online)', ''));
+      hover(m.node(), p.kind, [p.label].concat(p.detail ? [p.detail] : []));
+      if (!city) m.style('cursor', 'pointer').on('click', () => openPin(p, box));
+      if (city) g.append('text').attr('x', X(p.lon) + 8).attr('y', Y(p.lat) + 4).attr('font-size', 12).attr('fill', 'var(--color-fg)').text(p.label);
+    });
+    kinds.filter((k) => k !== 'City' && k !== 'Comp').forEach((k) => { const s = document.createElement('span'), sw = document.createElement('span'); sw.className = 'gl-sw'; sw.style.background = col(k); if (k === 'Auction') { sw.style.borderRadius = '0'; sw.style.transform = 'rotate(45deg) scale(.72)'; } s.append(sw, k === 'Comp' ? 'Past sale' : k === 'Candidate lot' ? 'Auction lot' : k); $('map-legend').append(s); });
+    { const lb = document.createElement('label'), cb = document.createElement('input'); lb.className = 'gl-toggle'; cb.type = 'checkbox'; cb.checked = state.past; cb.addEventListener('change', () => { state.past = cb.checked; draw(); }); cb.style.setProperty('--c', col('Comp')); lb.append(cb, 'Past sales'); $('map-legend').append(lb); }
+    const gO = { A: 0, B: 1, C: 2, Flagged: 3, 'Over budget': 4 };
+    const pg = (p) => { const [k, key] = (p.ref || '').split(':'); if (k !== 'lot' && k !== 'listing') return ''; return key.split(',').map((id) => avG.get(id)).filter(Boolean).sort((x, y) => gO[x] - gO[y])[0] || ''; };
+    const groups = [['Available now', places.filter((p) => p.kind === 'Candidate lot' || p.kind === 'Listing').sort((a, b) => (gO[pg(a)] ?? 9) - (gO[pg(b)] ?? 9))],
+      ['Upcoming auctions', places.filter((p) => p.kind === 'Auction')],
+      ['Past sales, for comparison', places.filter((p) => state.past && p.kind === 'Comp').sort((a, b) => gemA(b) - gemA(a) || Number(b.lat) - Number(a.lat))]];
+    groups.forEach(([title, ps]) => { if (!ps.length) return;
+      const hd = document.createElement('li'); hd.textContent = title; hd.style.fontWeight = '600'; hd.style.cursor = 'default'; hd.style.paddingTop = 'var(--cds-gap-md)'; $('map-list').append(hd);
+      ps.forEach((p) => {
+        const li = document.createElement('li'), sw = document.createElement('span'), b = document.createElement('span'), d = document.createElement('div');
+        sw.className = 'gl-sw'; sw.style.background = col(p.kind); b.textContent = p.label; d.className = 'gl-cap'; const na = p.kind === 'Comp' ? gemA(p) : 0, gr = pg(p);
+        d.textContent = (na ? na + ' past A lot' + (na > 1 ? 's' : '') + ' sold here. ' : '') + p.detail;
+        li.append(sw, b); if (gr) { const tag = gcell(gr).node; tag.style.marginLeft = '.4rem'; if (gr !== 'A' && gr !== 'B') tag.className = 'gl-cap'; li.append(tag); } li.append(d);
+        li.addEventListener('click', () => openPin(p, li)); $('map-list').append(li);
+      }); });
+  })();
+
+  // deadlines
+  (() => { const box = $('cal-grid'); box.replaceChildren(); if (!deadlines.length) return;
+    const byDay = d3.group(deadlines, (x) => x.date); const iso = (d) => d.toISOString().slice(0, 10);
+    if (!state.cal) { const t0 = day(today); t0.setUTCDate(t0.getUTCDate() - t0.getUTCDay()); state.cal = iso(t0); }
+    const start = day(state.cal), end = new Date(start.getTime() + 34 * 864e5);
+    const bar = document.createElement('div'); bar.className = 'gl-calbar';
+    const mk = (txt, lab, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'gl-chip'; b.textContent = txt; b.setAttribute('aria-label', lab); b.addEventListener('click', fn); return b; };
+    const shift = (n) => () => { const d0 = day(state.cal); d0.setUTCDate(d0.getUTCDate() + 7 * n); state.cal = iso(d0); draw(); };
+    const ttl = document.createElement('b'); ttl.textContent = d3.utcFormat('%b %-d')(start) + ' to ' + d3.utcFormat('%b %-d, %Y')(end);
+    bar.append(mk('‹', 'One week earlier', shift(-1)), ttl, mk('›', 'One week later', shift(1)), mk('Today', 'Back to this week', () => { state.cal = null; draw(); }));
+    const g = document.createElement('div'); g.className = 'gl-days';
+    ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach((t) => { const c = document.createElement('span'); c.className = 'gl-dow'; c.textContent = t; g.append(c); });
+    for (let i = 0; i < 35; i++) { const d0 = new Date(start.getTime() + i * 864e5), k = iso(d0), c = document.createElement('span'); const n = document.createElement('em'); n.textContent = (d0.getUTCDate() === 1 || i === 0 ? d3.utcFormat('%b ')(d0) : '') + d0.getUTCDate(); c.append(n); const ev = byDay.get(k);
+      if (k === today) c.classList.add('gl-now'); if (k < today) c.classList.add('gl-gone');
+      if (ev) { c.classList.add('gl-ev'); if (ev.some((e) => /^(online )?auction/i.test(e.event))) c.classList.add('gl-auc');
+        ev.forEach((e) => { const t = document.createElement('i'); t.textContent = e.county; const u = document.createElement('small'); let sh = e.event.split(/\. |;/)[0]; if (sh.length > 58) sh = sh.slice(0, 56).replace(/\s+\S*$/, '') + '…'; u.textContent = sh; c.append(t, u); });
+        hover(c, fmtDay(day(k)) + ' (' + when(k) + ')', ev.map((e) => e.county + ': ' + e.event)); c.tabIndex = 0; c.setAttribute('role', 'button'); c.style.cursor = 'pointer'; c.setAttribute('aria-label', fmtDay(day(k)) + ': ' + ev.map((e) => e.county + ', ' + e.event).join('; '));
+        const go = () => { const au = auctions.find((x) => x.county === ev[0].county); if (au) openAuction(au, c); else detail(c, fmtDay(day(k)) + ' (' + when(k) + ')', [], null, ev.map((e) => e.county + ': ' + e.event)); };
+        c.addEventListener('click', go); c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }); }
+      g.append(c); }
+    box.append(bar, g); })();
+  const dl = $('deadlines'); dl.replaceChildren();
+  deadlines.forEach((d) => {
+    const li = document.createElement('li'); if (d.date < today) li.className = 'gl-past';
+    [fmtDay(day(d.date)), d.county + ': ' + d.event, when(d.date)].forEach((t, i) => { const s = document.createElement('span'); s.textContent = t; if (i === 2) s.className = 'gl-cap'; li.append(s); });
+    dl.append(li);
+  });
+  fillTable('calendar', calendar, 'county', (r) => [r.county, r.typical_timing, r.date_2026, r.status, r.auctioneer]);
+  fillTable('auction-table', auctions, 'id', (r) => {
+    let link = '';
+    if (/^https:\/\//.test(r.url || '')) { const a = document.createElement('a'); a.href = r.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = r.url; link = { node: a }; }
+    return [r.county, fmtDay(day(r.date)), r.format, r.location, r.deposit, r.lots_status, link];
+  }, (a, tr) => openAuction(a, tr));
+
+  function openAuction(a, tr) {
+    const steps = deadlines.filter((x) => x.county === a.county).map((x) => fmtDay(day(x.date)) + ' (' + when(x.date) + '): ' + x.event);
+    const mine = byGrade(lots.filter((l) => l.county === a.county));
+    let extra = null;
+    if (mine.length) { extra = document.createElement('div'); const h4 = document.createElement('h4'); h4.textContent = 'What is at this auction: ' + mine.length + ' land lots, best first. Click one for its roundup.';
+      const tb = document.createElement('table'); tb.className = 'gl-table gl-click'; const hd = document.createElement('thead'), hr = document.createElement('tr'); ['Grade', 'Lot', 'Where', 'Acres', 'FMV', 'Target bid', 'Why'].forEach((x) => { const th = document.createElement('th'); th.textContent = x; hr.append(th); }); hd.append(hr);
+      const body = document.createElement('tbody');
+      mine.forEach((l) => { const g = lgAll.get(l.id) || {}, s = sById.get(l.id), row = document.createElement('tr');
+        const why = g.grade_at_target === 'Flagged' ? l.access : g.grade_at_target === 'Over budget' ? '60% of FMV is over $50K' : g.basis || 'No water or destination town';
+        [gcell(g.grade_at_target).node, l.lot, l.location, l.acres, usd(l.fmv), s ? usd(s.target_bid) : '', why].forEach((v) => { const td = document.createElement('td'); td.append(v); row.append(td); });
+        row.addEventListener('click', () => openLot(l, row)); body.append(row); });
+      tb.append(hd, body); extra.append(h4, tb); }
+    detail(tr, a.county + ' County tax auction', [['Date', fmtDay(day(a.date)) + ' (' + when(a.date) + ')'], ['Format', a.format], ['Where', a.location], ['Deposit', a.deposit], ['Lot list', a.lots_status], ['Auctioneer', a.auctioneer]], [],
+      [mine.length ? '' : 'No lots to show yet: ' + a.lots_status + '. I add and grade them once the catalog posts.', steps.length ? 'Dates to know:' : ''].concat(steps), ['Open the auction page', a.url], extra);
+  }
+  function openTown(p, anchor) {
+    const town = p.ref.slice(5), order = { A: 0, B: 1, C: 2, Flagged: 3, 'Over budget': 4 };
+    const g = new Map(graded.map((x) => [x.id, x.grade]));
+    const rs = sales.filter((r) => r.town === town).sort((x, y) => order[g.get(x.id)] - order[g.get(y.id)] || y.date.localeCompare(x.date));
+    let extra = null;
+    if (rs.length) { extra = document.createElement('table'); extra.className = 'gl-table gl-click'; extra.style.marginTop = 'var(--cds-gap-md)';
+      const tb = document.createElement('tbody'); extra.append(tb);
+      rs.forEach((r) => { const row = document.createElement('tr'); [g.get(r.id), d3.utcFormat('%b %Y')(day(r.date)), r.address || 'Lot ' + r.lot, r.acres + ' ac', r.water || 'dry', usd(r.high_bid)].forEach((t) => { const td = document.createElement('td'); td.textContent = t; row.append(td); }); row.addEventListener('click', () => openSale(r, row)); tb.append(row); }); }
+    detail(anchor, 'Past sales in ' + town, [['What the pin marks', p.detail], ['Sold lots in the catalog', rs.length], ['A or B lots', rs.filter((r) => g.get(r.id) === 'A' || g.get(r.id) === 'B').length]], [],
+      [rs.length ? 'Every land or camp lot from this town in the catalog. Click one for its full roundup.' : 'No land or camp lots from this town are in the catalog; the pin came from your earlier notes.', 'The pin marks the town, not the exact parcel.'], null, extra);
+  }
+  function openPin(p, anchor) {
+    const [kind, key] = (p.ref || '').split(':');
+    if (kind === 'lot') { const l = lots.find((x) => x.id === key); if (l) return openLot(l, anchor); }
+    if (kind === 'auction') { const a = auctions.find((x) => x.id === key); if (a) return openAuction(a, anchor); }
+    if (kind === 'listing') { const ids = key.split(','), all = rows('listings'); const l = all.find((x) => x.id === ids[0]); if (l) return openListing(l, anchor); }
+    if (kind === 'town') return openTown(p, anchor);
+    detail(anchor, p.label, [['Type', p.kind], ['What it is', p.detail]], [], ['The pin marks the town, not the exact parcel.'], null);
+  }
+  // candidates
+  const lg = new Map(lgr.map((x) => [x.id, x.grade_at_target])), lgb = new Map(lgr.map((x) => [x.id, x.basis])), lgd = new Map(lgr.map((x) => [x.id, x.destination_town]));
+  const avail = rows('available'), avById = new Map(avail.map((x) => [x.id, x]));
+  const avOrder = { A: 0, B: 1, C: 2, Flagged: 3, 'Over budget': 4 }, avNum = new Set(['acres', 'price', 'fmv', 'all_in', 'payback_seasons', 'drive_hours']);
+  const avGet = (r, f) => (f === 'grade' ? (avOrder[r.grade] ?? 9) : avNum.has(f) ? (r[f] == null || r[f] === '' ? Infinity : Number(r[f])) : String(r[f] ?? '').toLowerCase());
+  { const box = $('avail-chips'); box.replaceChildren();
+    [...new Set(avail.map((r) => r.grade))].sort((a, b) => (avOrder[a] ?? 9) - (avOrder[b] ?? 9)).forEach((gr) => { const b = document.createElement('button'); b.className = 'gl-chip'; b.type = 'button'; b.textContent = gr + ' (' + avail.filter((r) => r.grade === gr).length + ')'; b.setAttribute('aria-pressed', !state.av.off.has(gr)); b.addEventListener('click', () => { state.av.off.has(gr) ? state.av.off.delete(gr) : state.av.off.add(gr); draw(); }); box.append(b); });
+    const sel = document.createElement('select'); sel.className = 'gl-sel'; sel.setAttribute('aria-label', 'Type'); ['All', ...new Set(avail.map((r) => r.source))].forEach((x) => sel.append(new Option(x === 'All' ? 'All types' : x, x))); sel.value = state.av.type; sel.addEventListener('change', () => { state.av.type = sel.value; draw(); }); box.append(sel); }
+  const availShown = avail.filter((r) => !state.av.off.has(r.grade) && (state.av.type === 'All' || r.source === state.av.type));
+  if (state.av.sort) availShown.sort((a, b) => { const x = avGet(a, state.av.sort), y = avGet(b, state.av.sort); return (x < y ? -1 : x > y ? 1 : 0) * state.av.dir; });
+  $('avail-table').querySelectorAll('th').forEach((th) => { th.style.cursor = 'pointer'; th.setAttribute('aria-sort', state.av.sort === th.dataset.field ? (state.av.dir > 0 ? 'ascending' : 'descending') : 'none'); th.onclick = () => { state.av.dir = state.av.sort === th.dataset.field ? -state.av.dir : 1; state.av.sort = th.dataset.field; draw(); }; });
+  fillTable('avail-table', availShown, 'id', (r) => [gcell(r.grade), r.basis, r.source, r.name, r.county, num(r.acres), num(usd(r.price)), r.price_is, num(usd(r.fmv)), num(usd(r.all_in)), num(r.payback_seasons == null ? '' : d3.format('.1f')(r.payback_seasons)), num(hrs(r.drive_hours)), r.when, { t: r.notes, cls: 'gl-wide' }],
+    (r, tr) => { if (r.source === 'Auction lot') { const l = lots.find((x) => x.id === r.id); if (l) openLot(l, tr); } else { const l = rows('listings').find((x) => x.id === r.id); if (l) openListing(l, tr); } });
+  function openLot(l, tr) {
+    const lp = rows('lot_photos').find((x) => x.id === l.id), media = document.createElement('div'); media.className = 'gl-photos'; media.dataset.source = 'lot_photos';
+    const lurls = lp ? [lp.photo_1, lp.photo_2].filter((u) => /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(u || '')) : [];
+    lurls.forEach((u, i) => { const im = document.createElement('img'); im.src = u; im.alt = (i ? 'Tax map of ' : 'Aerial view of ') + l.lot + ', ' + l.location; media.append(im); });
+    if (!lurls.length) media.textContent = 'No catalog images on file for this lot.';
+    const s = sById.get(l.id), c = cands.find((x) => x.id === l.id), au = auctions.find((a) => a.county === l.county);
+    detail(tr, l.county + ' ' + l.lot + ': ' + l.location, [['#', 'The land'], ['Acres', l.acres], ['Destination town', lgd.get(l.id)], ['Drive from Riverdale', (avById.get(l.id) || {}).drive_hours == null ? '' : 'About ' + hrs(avById.get(l.id).drive_hours)], ['Structure', l.structure], ['Road access', l.access], ['North Star score', s.score + ' of 5'], ['#', 'The auction'], ['Auction', fmtDay(day(l.auction_date)) + ' (' + when(l.auction_date) + ')'], ['County value (FMV)', usd(l.fmv)], ['Target bid', usd(s.target_bid)], ['#', 'Money model (estimate)'], ['All-in with build', c ? usd(c.all_in) : ''], ['Monthly average', c ? usd(c.monthly_avg) : ''], ['Payback', c ? c.payback_seasons + ' seasons' : '']],
+      [['North Star criteria', [['3 or more acres', s.acres_3plus === 'Pass'], ['Waterfront named in the description', s.waterfront === 'Pass'], ['No access problem', s.access === 'Pass'], ['A bid at 60% of FMV stays under $30K', s.price === 'Pass'], ['Tourist county (Sullivan or Essex)', s.tourist_county === 'Pass']]]],
+      [l.notes, au ? 'Auction: ' + au.format + ' at ' + au.location + '. Deposit: ' + au.deposit + '.' : ''], au ? ['Open the auction property list', au.url] : null, null, media, [lg.get(l.id), lgb.get(l.id), ' (if won at the target bid)']); }
+
+  const linkCell = (u) => { if (!/^https:\/\//.test(u || '')) return ''; const a = document.createElement('a'); a.href = u; a.target = '_blank'; a.rel = 'noopener'; a.textContent = u; return { node: a }; };
+  function openListing(l, tr) { const m = model.find((x) => x.kind === 'dry'); const allIn = Number(l.price) + (m ? Number(m.build_cost) : 0);
+    const av = avById.get(l.id) || {};
+    const lm = document.createElement('div'); lm.className = 'gl-photos'; lm.dataset.source = 'listing_photos'; const lph = rows('listing_photos').find((x) => x.id === l.id);
+    const lpu = lph ? [lph.photo_1, lph.photo_2].filter((u) => /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(u || '')) : [];
+    lpu.forEach((u, i) => { const im = document.createElement('img'); im.src = u; im.alt = 'Listing photo ' + (i + 1) + ' of ' + l.property; lm.append(im); });
+    if (!lpu.length) lm.textContent = 'No photos saved for this listing yet.';
+    detail(tr, l.property, [['#', 'The land'], ['Town', l.town], ['County', l.county || 'Not noted'], ['Region', l.region], ['Acres', l.acres], ['Water', l.water || 'None confirmed'], ['Warning', l.flag || 'None'], ['Drive from Riverdale', av.drive_hours == null ? '' : 'About ' + hrs(av.drive_hours)], ['#', 'The price'], ['Asking price', usd(l.price)], ['$ per acre', usd(Number(l.price) / Number(l.acres))], ['#', 'Money model (estimate)'], ['All-in with build', usd(allIn)], ['Within $50K budget', allIn <= 50000 ? 'Yes' : 'No'], ['Payback (dry-lot model)', m ? payback(allIn, m) + ' seasons' : '']], [['Why it got this grade', [['Water confirmed', !!l.water], ['In a destination town' + (l.town ? ' (' + l.town + ')' : ''), av.destination_town === 'Yes'], ['3 or more acres (' + l.acres + ')', Number(l.acres) >= 3], ['Asking $30K or less (' + usd(l.price) + ')', Number(l.price) <= 30000], ['Pure value: 5+ acres at $25K or less', Number(l.acres) >= 5 && Number(l.price) <= 25000]]]], [l.notes, 'A regular listing, so a financing contingency is possible. Found ' + (l.found || 'Sept 2026') + '; check it is still for sale.'], ['Open the listing', l.url], null, lm, [av.grade, av.basis]); }
+  fillTable('ref-table', rows('reference'), 'id', (r) => [r.section, r.item, { t: r.detail, cls: 'gl-wide' }]);
+  fillTable('site-table', rows('sites'), 'name', (s) => [s.name, s.kind, s.covers, linkCell(s.url)]);
+
+  // past sales
+  fillTable('dest-table', rows('destinations'), null, (d) => [d.region, d.county, d.town, d.why]);
+  $('dest-table').querySelectorAll('tbody tr').forEach((tr, i) => { const d = rows('destinations')[i]; tr.dataset.key = encodeURIComponent(d.county) + ',' + encodeURIComponent(d.town); });
+  const gById = new Map(graded.map((x) => [x.id, x]));
+  const tot = dash.data('sales_totals'); const T = tot.status === 'ok' ? tot.data : null;
+  const gs = new Map(gsum.map((x) => [x.grade, x]));
+  const yrs = T ? Math.max(1, (day(T.last) - day(T.first)) / 864e5 / 365.25) : 1;
+  $('s-a').textContent = gs.has('A') ? gs.get('A').lots : '—';
+  $('s-b').textContent = gs.has('B') ? gs.get('B').lots : '—';
+  $('s-am').textContent = gs.has('A') ? usd(gs.get('A').median_high_bid) : '—';
+  $('s-n').textContent = T ? d3.format(',')(T.lots) : '—';
+  $('s-a-sub').textContent = gs.has('A') && T ? 'About ' + d3.format('.1f')(gs.get('A').lots / yrs) + ' a year across all counties' : '';
+  $('s-b-sub').textContent = gs.has('B') && T ? 'About ' + d3.format('.1f')(gs.get('B').lots / yrs) + ' a year' : '';
+  $('s-n-sub').textContent = T ? T.auctions + ' auctions, ' + d3.utcFormat('%b %Y')(day(T.first)) + ' to ' + d3.utcFormat('%b %Y')(day(T.last)) : '';
+  fillTable('grade-table', gsum, 'grade', (r) => [gcell(r.grade), num(r.lots), num(usd(r.median_high_bid)), num(r.median_acres ?? ''), num(r.median_pct_of_fmv == null ? '' : pct(r.median_pct_of_fmv))]);
+  const gcol = (g) => (g === 'A' ? dash.colors[0] : g === 'B' ? dash.colors[1] : 'var(--cds-chart-muted)');
+  const inRegion = sales.filter((r) => gById.has(r.id) && (state.region === 'All' || r.region === state.region));
+  // chips
+  const chips = $('sale-chips'); chips.replaceChildren();
+  const sel = document.createElement('select'); sel.className = 'gl-sel'; sel.setAttribute('aria-label', 'Region');
+  ['All', 'Adirondacks', 'Catskills', 'Other'].forEach((x) => sel.append(new Option(x === 'All' ? 'All regions' : x, x))); sel.value = state.region;
+  sel.addEventListener('change', () => { state.region = sel.value; draw(); }); chips.append(sel);
+  // table
+  const order = { A: 0, B: 1, C: 2, Flagged: 3, 'Over budget': 4 };
+  const val = { grade: (r) => order[gById.get(r.id).grade], pct_of_fmv: (r) => gById.get(r.id).pct_of_fmv, price_per_acre: (r) => gById.get(r.id).price_per_acre };
+  const numeric = new Set(['acres', 'fmv', 'high_bid', 'pct_of_fmv', 'price_per_acre', 'grade']); val.basis = (r) => gById.get(r.id).basis; val.drive_hours = (r) => gById.get(r.id).drive_hours; numeric.add('drive_hours');
+  const get = (r, f) => (val[f] ? val[f](r) : numeric.has(f) ? Number(r[f]) : String(r[f] ?? ''));
+  let shown = inRegion.filter((r) => state.grades.has(gById.get(r.id).grade));
+  shown.sort((a, b) => order[gById.get(a.id).grade] - order[gById.get(b.id).grade] || b.date.localeCompare(a.date));
+  if (state.sort) shown.sort((a, b) => { const x = get(a, state.sort), y = get(b, state.sort); return order[gById.get(a.id).grade] - order[gById.get(b.id).grade] || (x == null) - (y == null) || (x < y ? -1 : x > y ? 1 : 0) * state.dir; });
+  $('sale-table').querySelectorAll('th').forEach((th) => { th.style.cursor = 'pointer'; th.setAttribute('aria-sort', state.sort === th.dataset.field ? (state.dir > 0 ? 'ascending' : 'descending') : 'none'); th.onclick = () => { state.dir = state.sort === th.dataset.field ? -state.dir : 1; state.sort = th.dataset.field; draw(); }; });
+  fillTable('sale-table', shown, 'id', (r) => { const g = gById.get(r.id);
+    return [gcell(g.grade), g.basis, r.county, d3.utcFormat('%b %Y')(day(r.date)), r.lot, lotLink(r), r.town, r.kind, num(r.acres), r.water, num(usd(r.fmv)), num(usd(r.high_bid)), num(g.pct_of_fmv == null ? '' : pct(g.pct_of_fmv)), num(usd(g.price_per_acre)), num(hrs(g.drive_hours)), r.flag]; }, (r, tr) => openSale(r, tr));
+  function openSale(r, tr) {
+    const pid = 'photos_' + r.date.slice(0, 4), pd = dash.data(pid), media = document.createElement('div'); media.className = 'gl-photos'; media.dataset.source = pid;
+    let info = null;
+    if (pd.status === 'ok') { info = pd.data.find((x) => x.id === r.id) || null;
+      const urls = info ? [info.photo_1, info.photo_2].filter((u) => /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(u || '')) : [];
+      urls.forEach((u, i) => { const im = document.createElement('img'); im.src = u; im.alt = 'Auction photo ' + (i + 1) + ' of ' + (r.address || 'lot ' + r.lot) + ', ' + r.town; media.append(im); });
+      if (!urls.length) media.textContent = 'No photos on file for this lot.'; }
+    else if (pd.status === 'loading') { media.textContent = 'Loading photos…'; }
+    else media.textContent = 'Photos could not be loaded.';
+    const g = gById.get(r.id), bid = Number(r.high_bid), ac = Number(r.acres), w = !!r.water, land = r.kind === 'Land';
+    const m = model.find((x) => x.kind === (w ? 'water' : 'dry')); const allIn = bid + (land && m ? Number(m.build_cost) : 0);
+    const loc = g.destination_town === 'Yes';
+    const checks = land ? [['Water named in the listing' + (w ? ' (' + r.water + ')' : ''), w], ['In a destination town (' + r.town + ')', loc], ['3 or more acres (' + ac + ')', ac >= 3], ['No access or wetland warning' + (r.flag ? ' (' + r.flag + ')' : ''), !r.flag], ['High bid $30K or less (' + usd(bid) + ')', bid <= 30000], ['Catskills or Adirondacks county (' + r.region + ')', r.region !== 'Other'], ['Pure value: 5+ acres, $25K or less, and 60% of FMV or less', ac >= 5 && bid <= 25000 && Number(r.fmv) > 0 && bid <= 0.6 * Number(r.fmv)]]
+      : [['Water named in the listing' + (w ? ' (' + r.water + ')' : ''), w], ['In a destination town (' + r.town + ')', loc], ['1 or more acres (' + ac + ')', ac >= 1], ['No access or wetland warning' + (r.flag ? ' (' + r.flag + ')' : ''), !r.flag], ['High bid $50K or less (' + usd(bid) + ')', bid <= 50000]];
+    detail(tr, (r.address || 'Lot ' + r.lot) + ', ' + r.town, [['#', 'The land'], ['County', r.county + ' (' + r.region + ')'], ['Kind', r.kind], ['Acres', r.acres], ['Water', r.water || 'None named'], ['Warning', r.flag || 'None'], ['Drive from Riverdale', g.drive_hours == null ? '' : 'About ' + hrs(g.drive_hours) + ' (county estimate)'], ['Tax map number', info ? info.tax_map : ''], ['#', 'The sale'], ['Auction', d3.utcFormat('%b %-d, %Y')(day(r.date))], ['Lot number', r.lot], ['County value (FMV)', usd(r.fmv)], ['High bid', usd(bid)], ['% of county value', g.pct_of_fmv == null ? '' : pct(g.pct_of_fmv)], ['$ per acre', usd(g.price_per_acre)]].concat(land && m ? [['#', 'Money model if you had bought it (estimate)'], ['All-in with build', usd(allIn)], ['Monthly average', usd(m.monthly_avg)], ['Payback (' + m.kind + '-lot model)', payback(allIn, m) + ' seasons']] : []),
+      [['Why it got this grade', checks]],
+      [info && info.listing_text ? 'Listing: ' + info.listing_text : '', info && info.inspection ? 'Inspection note: ' + info.inspection : '', land ? '' : 'A camp or cottage: condition is unknown and the tent build model does not apply.'],
+      ['Open the auction page: all photos, tax map, deed', r.lot_url], null, media, [g.grade, g.basis]);
+    state.pending = pd.status === 'loading' ? r.id : null; }
+  { const tb = $('sale-table').querySelector('tbody'), trs = [...tb.children], ncol = $('sale-table').querySelectorAll('th').length, names = { A: 'A lots: true gems', B: 'B lots: strong buys', C: 'C lots: ordinary', Flagged: 'Flagged: access or wetland warning', 'Over budget': 'Over budget: sold above $50K' };
+    ['A', 'B', 'C', 'Flagged', 'Over budget'].forEach((gr) => { const n = inRegion.filter((r) => gById.get(r.id).grade === gr).length, open = state.grades.has(gr);
+      const tr = document.createElement('tr'), td = document.createElement('td'), bt = document.createElement('button'); tr.className = 'gl-grp'; td.colSpan = ncol; bt.type = 'button'; bt.setAttribute('aria-expanded', open);
+      bt.textContent = (open ? '\u25be ' : '\u25b8 ') + names[gr] + ' (' + n + ')' + (open ? '' : n ? '  \u00b7  click to show' : '');
+      bt.addEventListener('click', (e) => { e.stopPropagation(); open ? state.grades.delete(gr) : state.grades.add(gr); draw(); }); td.append(bt); tr.append(td);
+      const i = shown.findIndex((r) => order[gById.get(r.id).grade] >= order[gr]); tb.insertBefore(tr, i < 0 ? null : trs[i]); }); }
+  $('sale-count').textContent = sales.length ? 'Showing ' + shown.length + ' of ' + inRegion.length + ' lots' + (state.region === 'All' ? '' : ' in ' + state.region) + '.' : '';
+  // scatter
+  (() => {
+    const box = $('sale-chart'); box.replaceChildren(); const lg2 = $('sale-legend'); lg2.replaceChildren();
+    const pts = inRegion.filter((r) => Number(r.high_bid) <= 60000);
+    if (!pts.length) return;
+    [['A', dash.colors[0]], ['B', dash.colors[1]], ['C, flagged or over budget', 'var(--cds-chart-muted)']].forEach(([n, c]) => { const s = document.createElement('span'), sw = document.createElement('span'); sw.className = 'gl-sw'; sw.style.background = c; s.append(sw, n); lg2.append(s); });
+    const w = Math.max(280, box.clientWidth || 600), hh = 320, m = { l: 46, r: 14, t: 10, b: 36 };
+    const x = d3.scaleLog([0.05, 300], [m.l, w - m.r]).clamp(true), y = d3.scaleLinear([0, 60000], [hh - m.b, m.t]);
+    const svg = d3.select(box).append('svg').attr('viewBox', '0 0 ' + w + ' ' + hh).attr('width', '100%');
+    [0, 10000, 20000, 30000, 40000, 50000, 60000].forEach((v) => { svg.append('line').attr('x1', m.l).attr('x2', w - m.r).attr('y1', y(v)).attr('y2', y(v)).attr('stroke', 'var(--cds-chart-grid)'); svg.append('text').attr('x', m.l - 6).attr('y', y(v) + 4).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text('$' + v / 1000 + 'K'); });
+    [0.1, 1, 3, 10, 30, 100, 300].forEach((v) => { svg.append('text').attr('x', x(v)).attr('y', hh - m.b + 16).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text(v); });
+    svg.append('text').attr('x', (m.l + w - m.r) / 2).attr('y', hh - 4).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text('Acres (log scale)');
+    svg.append('rect').attr('x', x(3)).attr('y', y(30000)).attr('width', x(300) - x(3)).attr('height', y(0) - y(30000)).attr('fill', dash.colors[0]).attr('opacity', 0.08);
+    svg.append('rect').attr('x', x(3)).attr('y', y(30000)).attr('width', x(300) - x(3)).attr('height', y(0) - y(30000)).attr('fill', 'none').attr('stroke', dash.colors[0]).attr('stroke-dasharray', '4 3');
+    const rank = { A: 3, B: 2 };
+    pts.slice().sort((a, b) => (rank[gById.get(a.id).grade] || 0) - (rank[gById.get(b.id).grade] || 0)).forEach((r) => {
+      const g = gById.get(r.id), top = g.grade === 'A' || g.grade === 'B';
+      const c = svg.append('circle').attr('cx', x(Math.max(0.05, Number(r.acres)))).attr('cy', y(Number(r.high_bid))).attr('r', top ? 6 : 3.5)
+        .attr('fill', g.grade === 'Flagged' ? 'none' : gcol(g.grade)).attr('stroke', top ? 'var(--color-panel)' : gcol(g.grade)).attr('stroke-width', top ? 1.5 : 1).attr('opacity', top ? 1 : 0.7);
+      hover(c.node(), 'Grade ' + g.grade + ' · ' + r.county + ' ' + r.date.slice(0, 4) + ' #' + r.lot, [r.address + ', ' + r.town, r.kind + ', ' + r.acres + ' ac' + (r.water ? ', on ' + r.water : ''), 'High bid ' + usd(r.high_bid) + (r.fmv ? ' (FMV ' + usd(r.fmv) + ')' : ''), r.flag].filter(Boolean));
+    });
+  })();
+
+  // roi
+  const all = types.map((t) => ({ label: t.lot_type, land: t.land_cost, all_in: Number(t.land_cost) + Number(t.build_cost), y1: t.year1_net, mat: t.mature_net, mo: t.monthly_avg, pay: Number(t.payback_seasons), src: 'Research estimate', i: 3 }))
+    .concat(cands.map((c) => ({ label: c.label, land: c.land_cost, all_in: c.all_in, y1: c.year1_net, mat: c.mature_net, mo: c.monthly_avg, pay: c.payback_seasons, src: 'Current candidate, calculated', i: 0 })));
+  bars('pay-chart', all.map((r) => ({ label: r.label, value: r.pay, text: d3.format('.1f')(r.pay), color: dash.colors[r.i], tip: [r.src, 'All-in ' + usd(r.all_in), 'Monthly average ' + usd(r.mo), 'Payback ' + d3.format('.1f')(r.pay) + ' seasons'] })), d3.max(all, (r) => r.pay) || 1);
+  fillTable('roi-table', all, null, (r) => [r.label, num(usd(r.land)), num(usd(r.all_in)), num(usd(r.y1)), num(usd(r.mat)), num(usd(r.mo)), num(d3.format('.1f')(r.pay))]);
+  fillTable('model-table', model, 'kind', (m) => [m.kind, num(usd(m.nightly_rate)), num(usd(m.build_cost)), num(pct(m.year1_occupancy)), num(pct(m.mature_occupancy)), num(usd(m.year1_net)), num(usd(m.mature_net)), num(usd(m.monthly_avg))]);
+  if (state.pending) { const pr = sales.find((x) => x.id === state.pending); if (pr && dash.data('photos_' + pr.date.slice(0, 4)).status !== 'loading') openSale(pr, wrap); }
+};
+dash.onData(draw);
+</script>
+</div></body></html>
