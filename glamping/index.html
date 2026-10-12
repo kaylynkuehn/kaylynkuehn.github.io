@@ -166,6 +166,12 @@ window.dash={colors:['#2a78d6','#d97706','#16a34a','#9333ea','#888','#888','#888
         <th data-field="grade">Grade</th><th data-field="basis">Why</th><th data-field="source">Type</th><th data-field="name">Property</th><th data-field="county">County</th><th class="gl-num" data-field="acres">Acres</th><th class="gl-num" data-field="price">Price</th><th data-field="price_is">Price is</th><th class="gl-num" data-source="price_log" data-field="price" title="How far the asking price has moved since it was first listed. Listings only.">Since listed</th><th class="gl-num" data-field="fmv" title="Full market value: the county's own estimate of what the property is worth, from the tax roll. Auction lots only.">County value</th><th class="gl-num" data-field="all_in">All-in with build</th><th class="gl-num" data-field="payback_seasons">Payback</th><th class="gl-num" data-field="drive_hours">Drive</th><th data-field="when">When</th><th data-field="notes">Notes</th></tr></thead><tbody></tbody></table></div></div>
   </section>
 
+  <section id="houses">
+    <h2 class="gl-h2">Option 3: cheap houses to finance</h2>
+    <div class="gl-card"><p class="gl-note">Houses and cabins at $125K or less in the Catskills and Adirondacks that could rent as a rustic stay. Charm potential is my read of the listing photos: could it look charming after rehab, given the building's shape and what surrounds it. Tap a row for photos and details; they are also on the map as Cheap house pins. Found Oct 11 on Homes.com county pages (first page of each county only). Down payment is 20% of asking. Monthly is principal and interest on the rest at 7.4% over 30 years (Freddie Mac's average for the week of Oct 8, 2026). Rental and second-home loans usually price higher, and taxes and insurance are extra.</p><p class="gl-note"><b>What $50K cash covers:</b> a house of about $104K if you keep $25K for repairs and furnishing, or about $146K if you keep $15K. That assumes 20% down plus about 4% closing costs. At 25% down the same cash covers about $86K or $121K.</p>
+      <div class="gl-scroll"><table class="gl-table gl-click" id="houses-table" data-source="houses" data-row-key="id"><thead><tr><th data-field="charm" title="How charming it could look after rehab, judged from the listing photos: the building shape and the setting, not its current condition.">Charm potential</th><th data-field="region">Region</th><th data-field="address">Property</th><th class="gl-num" data-field="price">Asking</th><th class="gl-num" data-field="price">20% down</th><th class="gl-num" data-field="price">Monthly</th><th data-field="what">What it is</th><th data-field="beds">Size</th><th class="gl-num" data-field="acres">Acres</th><th data-field="finance">Financing</th><th data-field="note">Note</th><th data-field="url">Link</th></tr></thead><tbody></tbody></table></div></div>
+  </section>
+
   <section id="auctions">
     <h2 class="gl-h2">Auction deadlines</h2>
     <div class="gl-card"><div id="cal-grid" data-source="deadlines"></div>
@@ -405,7 +411,7 @@ function fillTable(id, data, key, cells, onRow) {
     body.append(tr);
   });
 }
-function closeDetail() { state.pending = null; const o = $('gl-detail'), b = $('gl-back'); if (o) o.remove(); if (b) b.remove(); }
+function closeDetail() { state.pending = null; state.pendingHouse = null; const o = $('gl-detail'), b = $('gl-back'); if (o) o.remove(); if (b) b.remove(); }
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDetail(); });
 function detail(anchor, title, facts, checks, notes, link, extra, media, badge) {
   closeDetail();
@@ -493,11 +499,11 @@ const draw = () => {
 
   // map
   (() => {
-    const places = rows('places'), counties = rows('ny_counties'), box = $('map-chart');
+    const places = rows('places').concat(rows('houses').filter((h) => h.lat && h.lon).map((h) => ({ id: 'h-' + h.id, kind: 'House', label: h.address + ', ' + h.town, lat: h.lat, lon: h.lon, detail: usd(h.price) + ': ' + h.what, ref: 'house:' + h.id }))), counties = rows('ny_counties'), box = $('map-chart');
     box.replaceChildren(); $('map-list').replaceChildren(); $('map-legend').replaceChildren();
     if (!places.length || !counties.length) return;
-    const kinds = ['Candidate lot', 'Auction', 'Listing', 'Comp', 'City'];
-    const col = (k) => (k === 'City' ? 'var(--color-fg)' : dash.colors[kinds.indexOf(k)]);
+    const kinds = ['Candidate lot', 'Auction', 'Listing', 'Comp', 'City', 'House'];
+    const col = (k) => (k === 'City' ? 'var(--color-fg)' : k === 'House' ? '#c026d3' : dash.colors[kinds.indexOf(k)]);
     const tracked = new Set(calendar.map((c) => c.county));
     const L0 = -76.4, L1 = -73.2, B0 = 40.45, B1 = 45.1, K = 200, kx = Math.cos(42.8 * Math.PI / 180);
     const X = (lon) => (Number(lon) - L0) * kx * K, Y = (lat) => (B1 - Number(lat)) * K;
@@ -516,7 +522,7 @@ const draw = () => {
       g.append('text').attr('x', lx).attr('y', ly - 5).attr('text-anchor', 'middle').attr('font-size', 11).attr('font-weight', 600).attr('fill', 'var(--color-fg-muted)').attr('stroke', 'var(--color-panel)').attr('stroke-width', 3).attr('paint-order', 'stroke').text(hr + ' hr'); });
     const avG = new Map(rows('available').map((x) => [x.id, x.grade])), gG = new Map(graded.map((x) => [x.id, x.grade]));
     const gemA = (p) => { const [k, key] = (p.ref || '').split(':'); if (k === 'lot' || k === 'listing') return key.split(',').some((id) => avG.get(id) === 'A') ? 1 : 0; if (k === 'town') return sales.filter((r) => r.town === key && gG.get(r.id) === 'A').length; return 0; };
-    const zi = (k) => (k === 'Auction' ? 9 : 4 - kinds.indexOf(k));
+    const zi = (k) => (k === 'Auction' ? 9 : k === 'House' ? 5 : 4 - kinds.indexOf(k));
     const order = places.filter((p) => state.past || p.kind !== 'Comp').sort((a, b) => zi(a.kind) - zi(b.kind));
     order.forEach((p) => {
       const city = p.kind === 'City', big = p.kind === 'Candidate lot' || p.kind === 'Auction';
@@ -529,11 +535,12 @@ const draw = () => {
       if (!city) m.style('cursor', 'pointer').on('click', () => openPin(p, box));
       if (city) g.append('text').attr('x', X(p.lon) + 8).attr('y', Y(p.lat) + 4).attr('font-size', 12).attr('fill', 'var(--color-fg)').text(p.label);
     });
-    kinds.filter((k) => k !== 'City' && k !== 'Comp').forEach((k) => { const s = document.createElement('span'), sw = document.createElement('span'); sw.className = 'gl-sw'; sw.style.background = col(k); if (k === 'Auction') { sw.style.borderRadius = '0'; sw.style.transform = 'rotate(45deg) scale(.72)'; } s.append(sw, k === 'Comp' ? 'Past sale' : k === 'Candidate lot' ? 'Auction lot' : k); $('map-legend').append(s); });
+    kinds.filter((k) => k !== 'City' && k !== 'Comp').forEach((k) => { const s = document.createElement('span'), sw = document.createElement('span'); sw.className = 'gl-sw'; sw.style.background = col(k); if (k === 'Auction') { sw.style.borderRadius = '0'; sw.style.transform = 'rotate(45deg) scale(.72)'; } s.append(sw, k === 'Comp' ? 'Past sale' : k === 'Candidate lot' ? 'Auction lot' : k === 'House' ? 'Cheap house' : k); $('map-legend').append(s); });
     { const lb = document.createElement('label'), cb = document.createElement('input'); lb.className = 'gl-toggle'; cb.type = 'checkbox'; cb.checked = state.past; cb.addEventListener('change', () => { state.past = cb.checked; draw(); }); cb.style.setProperty('--c', col('Comp')); lb.append(cb, 'Past sales'); $('map-legend').append(lb); }
     const gO = { A: 0, B: 1, C: 2, Flagged: 3, 'Over budget': 4 };
     const pg = (p) => { const [k, key] = (p.ref || '').split(':'); if (k !== 'lot' && k !== 'listing') return ''; return key.split(',').map((id) => avG.get(id)).filter(Boolean).sort((x, y) => gO[x] - gO[y])[0] || ''; };
     const groups = [['Available now', places.filter((p) => p.kind === 'Candidate lot' || p.kind === 'Listing').sort((a, b) => (gO[pg(a)] ?? 9) - (gO[pg(b)] ?? 9))],
+      ['Cheap houses to finance', places.filter((p) => p.kind === 'House')],
       ['Upcoming auctions', places.filter((p) => p.kind === 'Auction')],
       ['Past sales, for comparison', places.filter((p) => state.past && p.kind === 'Comp').sort((a, b) => gemA(b) - gemA(a) || Number(b.lat) - Number(a.lat))]];
     groups.forEach(([title, ps]) => { if (!ps.length) return;
@@ -608,11 +615,25 @@ const draw = () => {
     detail(anchor, 'Past sales in ' + town, [['What the pin marks', p.detail], ['Sold lots in the catalog', rs.length], ['A or B lots', rs.filter((r) => g.get(r.id) === 'A' || g.get(r.id) === 'B').length]], [],
       [rs.length ? 'Every land or camp lot from this town in the catalog. Click one for its full roundup.' : 'No land or camp lots from this town are in the catalog; the pin came from your earlier notes.', 'The pin marks the town, not the exact parcel.'], null, extra);
   }
+  function openHouse(h, anchor) {
+    const okp = (u) => /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(u || '');
+    const ph = rows('hphotos_1').concat(rows('hphotos_2')).filter((x) => x.id === h.id).sort((a, b) => a.i - b.i).map((x) => x.photo).filter(okp);
+    const m = document.createElement('div'); m.className = 'gl-photos' + (ph.length > 2 ? ' gl-strip' : ''); m.dataset.source = 'hphotos_1';
+    ph.forEach((u, i) => { const im = document.createElement('img'); im.src = u; im.alt = 'Listing photo ' + (i + 1) + ' of ' + h.address; m.append(im); });
+    const hload = ['hphotos_1', 'hphotos_2'].some((k) => dash.data(k).status === 'loading');
+    if (!ph.length) m.textContent = hload ? 'Loading photos...' : 'No photos saved for this house yet.';
+    const p = Number(h.price), f = (0.074 / 12) / (1 - Math.pow(1 + 0.074 / 12, -360));
+    detail(anchor, h.region + ': ' + h.address + ', ' + h.town, [['#', 'The house'], ['What it is', h.what], ['Size', h.beds], ['Acres', h.acres == null ? 'Not shown' : h.acres], ['Year built', h.year || h.year_listed || 'Not shown'], ['County', h.county], ['Charm potential', h.charm ? h.charm + '. ' + h.charm_note : 'Not judged'], ['Fit for a rustic rental', h.fit],
+      ['#', 'Money'], ['Asking', usd(p)], ['Cash up front (20% down + about 4% closing)', usd(p * 0.24)], ['Financed', usd(p * 0.8)], ['Monthly loan payment', usd(p * 0.8 * f) + ' at 7.4% over 30 years'], ['Property taxes', h.taxes ? usd(h.taxes) + ' a year (as shown on the listing)' : 'Not shown'], ['Financing', h.finance]],
+      [], [h.note, h.about ? 'Listing: ' + h.about : ''], ['See the listing on Homes.com', h.url], null, m);
+    if (hload) state.pendingHouse = h.id;
+  }
   function openPin(p, anchor) {
     const [kind, key] = (p.ref || '').split(':');
     if (kind === 'lot') { const l = lots.find((x) => x.id === key); if (l) return openLot(l, anchor); }
     if (kind === 'auction') { const a = auctions.find((x) => x.id === key); if (a) return openAuction(a, anchor); }
     if (kind === 'listing') { const ids = key.split(','), all = rows('listings'); const l = all.find((x) => x.id === ids[0]); if (l) return openListing(l, anchor); }
+    if (kind === 'house') { const h = rows('houses').find((x) => x.id === key); if (h) return openHouse(h, anchor); }
     if (kind === 'town') return openTown(p, anchor);
     detail(anchor, p.label, [['Type', p.kind], ['What it is', p.detail]], [], ['The pin marks the town, not the exact parcel.'], null);
   }
@@ -806,7 +827,10 @@ const draw = () => {
     .concat(cands.map((c) => ({ label: c.label, land: c.land_cost, all_in: c.all_in, y1: c.year1_net, mat: c.mature_net, mo: c.monthly_avg, pay: c.payback_seasons, src: 'Current candidate, calculated', i: 0 })));
   bars('pay-chart', all.map((r) => ({ label: r.label, value: r.pay, text: d3.format('.1f')(r.pay), color: dash.colors[r.i], tip: [r.src, 'All-in ' + usd(r.all_in), 'Monthly average ' + usd(r.mo), 'Payback ' + d3.format('.1f')(r.pay) + ' seasons'] })), d3.max(all, (r) => r.pay) || 1);
   fillTable('roi-table', all, null, (r) => [r.label, num(usd(r.land)), num(usd(r.all_in)), num(usd(r.y1)), num(usd(r.mat)), num(usd(r.mo)), num(d3.format('.1f')(r.pay))]);
+  fillTable('houses-table', rows('houses'), 'id', (h) => { const p = Number(h.price), loan = p * 0.8, mo = loan * (0.074 / 12) / (1 - Math.pow(1 + 0.074 / 12, -360)); const a = document.createElement('a'); a.href = /^https:\/\/www\.homes\.com\//.test(h.url || '') ? h.url : '#'; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Listing'; return [h.charm || '', rcell(h.region), h.address + ', ' + h.town, num(usd(p)), num(usd(p * 0.2)), num(usd(mo)), h.what, h.beds, num(h.acres == null ? '' : h.acres), h.finance, h.charm_note || h.note, { node: a }]; }, (h, tr) => openHouse(h, tr));
   fillTable('model-table', model, 'kind', (m) => [m.kind, num(usd(m.nightly_rate)), num(usd(m.build_cost)), num(pct(m.year1_occupancy)), num(pct(m.mature_occupancy)), num(usd(m.year1_net)), num(usd(m.mature_net)), num(usd(m.monthly_avg))]);
+  ['build', 'hphotos_1', 'hphotos_2'].forEach((k) => dash.data(k));
+  if (state.pendingHouse && !['hphotos_1', 'hphotos_2'].some((k) => dash.data(k).status === 'loading')) { const ph = rows('houses').find((x) => x.id === state.pendingHouse); if (ph) openHouse(ph, wrap); }
   if (state.pending) { const pr = sales.find((x) => x.id === state.pending); if (pr && dash.data('photos_' + pr.date.slice(0, 4) + (pr.date.slice(0, 4) === '2026' ? (pr.date < '2026-07-01' ? 'a' : 'b') : '')).status !== 'loading') openSale(pr, wrap); }
 };
 dash.onData(draw);
