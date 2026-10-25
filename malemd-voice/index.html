@@ -273,9 +273,9 @@ function pair(p){
    </div>
    <div class="why" id="why" role="status" ${a.pick?'':'hidden'}><span class="eyebrow"><b>The strategy</b></span><div class="wt">${esc(WHY[p.id].t)}</div><p><b>A:</b> ${esc(WHY[p.id].a)}</p><p><b>B:</b> ${esc(WHY[p.id].b)}</p></div>
    <label class="nl" for="note">Note (optional). What you'd change, or why.<textarea id="note" rows="2" placeholder="e.g. A, but less aggressive">${esc(a.note||'')}</textarea></label>
-   <div class="nav"><button class="ghost" id="back">← Back</button>${state.submitted?'<button class="ghost" id="tosum">Back to summary</button>':''}<button class="go" id="next" ${a.pick?'':'disabled'}>Next</button></div></div>`;
+   <div class="nav"><button class="ghost" id="back">← Back</button>${state.submitted?'<button class="ghost" id="tosum">Skip to resubmit</button>':''}<button class="go" id="next" ${a.pick?'':'disabled'}>Next</button></div></div>`;
   if(state.submitted)document.getElementById('tosum').onclick=()=>{state.step=PAIRS.length;save();render()};
-  const pick=k=>{state.answers[p.id]=Object.assign(state.answers[p.id]||{},{pick:k});save();
+  const pick=k=>{state.answers[p.id]=Object.assign(state.answers[p.id]||{},{pick:k});if(state.submitted)state.savedAt='';save();
     el.querySelectorAll('[data-k]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));document.getElementById('next').disabled=false;document.getElementById('why').hidden=false};
   el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>pick(b.dataset.k));
   document.getElementById('note').oninput=e=>{state.answers[p.id]=Object.assign(state.answers[p.id]||{},{note:e.target.value});save()};
@@ -317,13 +317,13 @@ const F={session:'entry.1596762017',status:'entry.1578207017',answers:'entry.103
 let greet='';try{greet=(new URLSearchParams(location.search).get('n')||'').slice(0,40)}catch(e){}
 if(!state.sid){state.sid='R-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);save()}
 let lastSent='';
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!state.submitted&&Object.keys(state.answers).length)sync(false,true)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&Object.keys(state.answers).length&&!(state.submitted&&state.savedAt))sync(false,true)});
 async function sync(final,leaving){
   const st=document.getElementById('st');
   const done=PAIRS.filter(p=>state.answers[p.id]?.pick).length;
   const body=new URLSearchParams();
   body.set(F.session,`${state.name||'(no name)'} · ${state.sid}`);
-  body.set(F.status,final?(state.submitCount>1?`Resubmitted #${state.submitCount} (${done}/${PAIRS.length})`:`Submitted (${done}/${PAIRS.length})`):`In progress (${done}/${PAIRS.length})`);
+  body.set(F.status,final?(state.submitCount>1?`Resubmitted #${state.submitCount} (${done}/${PAIRS.length})`:`Submitted (${done}/${PAIRS.length})`):state.submitted?`Edited after submit, not resubmitted (${done}/${PAIRS.length})`:`In progress (${done}/${PAIRS.length})`);
   body.set(F.answers,resultsText());
   body.set(F.other,state.opens.other||'');
   body.set(F.raw,JSON.stringify({name:state.name,sid:state.sid,submitCount:state.submitCount||0,answers:state.answers,opens:state.opens,submitted:!!final,at:new Date().toISOString()}));
