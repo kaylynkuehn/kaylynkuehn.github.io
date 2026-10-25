@@ -94,6 +94,8 @@ textarea:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-
 .status.ok{color:#5fd38d}
 .status.err{color:#ff8a7a}
 .opens{display:grid;gap:16px}
+.logo,.prog{white-space:nowrap}
+@media (max-width:480px){.logo{font-size:17px}.bar{width:56px}.wrap{padding-block:18px 48px}}
 .ctxrow{display:flex;flex-wrap:wrap;gap:8px}
 .cx{display:inline-flex;gap:8px;align-items:baseline;background:var(--panel);border:1px solid var(--rule);border-radius:999px;padding:6px 12px;font:500 13px var(--body);color:var(--ink);min-width:0}
 .cx i{font:500 10.5px var(--mono);font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:var(--red)}
@@ -276,7 +278,7 @@ function pair(p){
    <div class="nav"><button class="ghost" id="back">← Back</button>${state.submitted?'<button class="ghost" id="tosum">Skip to resubmit</button>':''}<button class="go" id="next" ${a.pick?'':'disabled'}>Next</button></div></div>`;
   if(state.submitted)document.getElementById('tosum').onclick=()=>{state.step=PAIRS.length;save();render()};
   const pick=k=>{state.answers[p.id]=Object.assign(state.answers[p.id]||{},{pick:k});if(state.submitted)state.savedAt='';save();
-    el.querySelectorAll('[data-k]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));document.getElementById('next').disabled=false;document.getElementById('why').hidden=false};
+    el.querySelectorAll('[data-k]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));document.getElementById('next').disabled=false;const wy=document.getElementById('why');wy.hidden=false;if(window.innerWidth<720){const r=wy.getBoundingClientRect();if(r.bottom>window.innerHeight)wy.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}};
   el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>pick(b.dataset.k));
   document.getElementById('note').oninput=e=>{state.answers[p.id]=Object.assign(state.answers[p.id]||{},{note:e.target.value});save()};
   document.getElementById('back').onclick=()=>{state.step--;save();render()};
