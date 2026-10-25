@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="description" content="A 7-minute tone exercise to shape how MaleMD emails and texts sound."><meta property="og:title" content="MaleMD Voice Quiz"><meta property="og:description" content="A 7-minute tone exercise to shape how MaleMD emails and texts sound."><meta name="theme-color" content="#0D0D0D"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%230D0D0D%27/%3E%3Ctext x=%2716%27 y=%2722%27 font-family=%27Arial%27 font-weight=%27900%27 font-size=%2714%27 text-anchor=%27middle%27 fill=%27%23FF2A2A%27%3EMD%3C/text%3E%3C/svg%3E"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
 <title>MaleMD Voice Quiz</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -117,7 +117,7 @@ textarea:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-
 <script>
 const PAIRS=[
  {id:'subj-lapsed',aud:'Lapsed Alpha customers',moment:'Alpha+ relaunch email',el:'Subject line',q:'Which subject line gets a lapsed Alpha customer to open?',type:'inbox',
-  a:{trait:'Clarity',s:'Alpha+ is here. Hard in about 15 minutes.*',p:'The 4-in-1 mint for arousal and blood flow.'},
+  a:{trait:'Clarity',s:'Alpha+ is here. Hard in about 15 minutes.',p:'The 4-in-1 mint for arousal and blood flow.'},
   b:{trait:'Curiosity',s:'We rebuilt the mint you used to take',p:'Two new actives. One you\'ll feel before anything else.'}},
  {id:'subj-new',aud:'New prospect, never ordered',moment:'Abandoned questionnaire, day 1',el:'Subject line',q:'Which subject line gets him back to finish?',type:'inbox',
   a:{trait:'Curiosity',s:'Still thinking it over?',p:'Most guys have the same three questions.'},
@@ -159,10 +159,10 @@ const PAIRS=[
   a:{trait:'Relationship',p:['You already trust your MaleMD doctor with your ED treatment.','The same doctors now prescribe Sermorelin.']},
   b:{trait:'Big numbers',p:['100,000+ men nationwide trust MaleMD.','Compounded in FDA-registered U.S. pharmacies.']}},
  {id:'wink-lapsed',aud:'Lapsed Alpha customers',moment:'Alpha+ relaunch email',el:'Callout',q:'Room for a wink with men who already know you?',type:'hero',
-  a:{trait:'Straight',h:'Active for up to 36 hours.*',sub:'One mint. Fast onset. Long window.',btn:'See If It\'s Right For Me'},
-  b:{trait:'Wink',h:'Round two? Covered.',sub:'Up to 36 hours from one mint.*',btn:'See If It\'s Right For Me'}},
+  a:{trait:'Straight',h:'Active for up to 36 hours.',sub:'One mint. Fast onset. Long window.',btn:'See If It\'s Right For Me'},
+  b:{trait:'Wink',h:'Round two? Covered.',sub:'Up to 36 hours from one mint.',btn:'See If It\'s Right For Me'}},
  {id:'wink-bfcm',aud:'Existing customers',moment:'Black Friday',el:'Subject line',q:'Which Black Friday subject line would you send?',type:'inbox',
-  a:{trait:'Wink',s:'Black Friday deals that last up to 36 hours*',p:'Our lowest prices of the year on Alpha+ and KnockoutRx.'},
+  a:{trait:'Wink',s:'Black Friday deals that last up to 36 hours',p:'Our lowest prices of the year on Alpha+ and KnockoutRx.'},
   b:{trait:'Straight',s:'Black Friday: our lowest prices of the year',p:'Alpha+, KnockoutRx and more, through Cyber Monday.'}},
  {id:'partner-new',aud:'New prospect, never ordered',moment:'Abandoned questionnaire',el:'Email hero',q:'Who is this copy about?',type:'hero',
   a:{trait:'Partner',h:'Your partner will notice. So will you.',sub:'Daily treatment. Always ready.',btn:'Finish My Questionnaire'},
@@ -246,7 +246,7 @@ function render(){
 }
 function intro(){
   el.innerHTML=`<div style="display:grid;gap:22px">
-   <div class="eyebrow">For ${esc(state.name||'the MaleMD team')} · ${PAIRS.length} questions · About 7 minutes</div>
+   <div class="eyebrow">For ${esc(greet||'the MaleMD team')} · ${PAIRS.length} questions · About 7 minutes</div>
    <h1>How should <em>MaleMD</em> sound?</h1>
    <p class="lede">A quick tone exercise. Your picks help train the AI I write with, so drafts sound like MaleMD from the start.</p>
    <ul class="how">
@@ -314,7 +314,7 @@ function done(){
 }
 const FORM='https://docs.google.com/forms/d/e/1FAIpQLSfRgWLusT5iSDwOk7I9XHID5Nb1-JPeqoyFjYww2Nw0zLpu-Q/formResponse';
 const F={session:'entry.1596762017',status:'entry.1578207017',answers:'entry.1037937472',other:'entry.1121538626',raw:'entry.471080508'};
-try{const n=new URLSearchParams(location.search).get('n');if(n&&!state.name){state.name=n.slice(0,40);save()}}catch(e){}
+let greet='';try{greet=(new URLSearchParams(location.search).get('n')||'').slice(0,40)}catch(e){}
 if(!state.sid){state.sid='R-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);save()}
 let lastSent='';
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!state.submitted&&Object.keys(state.answers).length)sync(false,true)});
