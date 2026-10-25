@@ -1,0 +1,330 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>MaleMD Voice Quiz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500;62..125,700;62..125,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one pair per screen. Context strip, question, two side-by-side copy specimens rendered as they'd appear (inbox row, hero, body, mini email, button), then the pick bar. Committed dark look in MaleMD's own black/red/white. */
+:root{
+  color-scheme:dark;
+  --bg:#0D0D0D; --panel:#171616; --raise:#201f1f; --ink:#F4F2F0; --mute:#9B9794; --rule:#2E2C2B;
+  --red:#FF2A2A; --redink:#ffffff; --paper:#FFFFFF; --paperink:#141414; --papermute:#6B6965;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font:16px/1.5 var(--body);margin:0}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;display:grid;gap:24px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:14px}
+.logo{font:800 20px/1 var(--display);font-stretch:80%;letter-spacing:.02em;text-transform:uppercase}
+.logo b{color:var(--red)}
+.prog{font:500 12px var(--mono);color:var(--mute);font-variant-numeric:tabular-nums;display:flex;gap:10px;align-items:center}
+.bar{width:120px;height:3px;background:var(--rule);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--red);width:0;transition:width .3s}
+h1{font:800 clamp(38px,7vw,76px)/.92 var(--display);font-stretch:70%;text-transform:uppercase;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--red)}
+h2{font:800 clamp(28px,4.4vw,44px)/1 var(--display);font-stretch:72%;text-transform:uppercase;margin:0;text-wrap:balance}
+.lede{color:var(--mute);max-width:62ch;margin:0;font-size:17px}
+.eyebrow{font:500 11px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.eyebrow b{color:var(--red);font-weight:500}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:0;padding:0;list-style:none}
+.how li{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:16px;display:grid;gap:6px;min-width:0}
+.how b{font:700 15px var(--body)}
+.how span{color:var(--mute);font-size:14px}
+.q{display:grid;gap:8px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:720px){.pair{grid-template-columns:1fr}}
+.opt{all:unset;cursor:pointer;display:grid;gap:12px;align-content:start;background:var(--panel);border:2px solid var(--rule);border-radius:8px;padding:16px;min-width:0;transition:border-color .15s,transform .15s}
+.opt:hover{border-color:#4a4644}
+.opt:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+.opt[aria-pressed="true"]{border-color:var(--red)}
+.opt .lab{display:flex;justify-content:space-between;align-items:center;font:500 12px var(--mono);color:var(--mute)}
+.opt .lab .chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--rule);display:grid;place-items:center;font-size:12px;color:transparent}
+.opt[aria-pressed="true"] .lab .chk{background:var(--red);border-color:var(--red);color:#fff}
+.opt[aria-pressed="true"] .lab{color:var(--ink)}
+/* specimens */
+.spec{background:var(--paper);color:var(--paperink);border-radius:4px;overflow:hidden;min-width:0}
+.inbox{display:grid;grid-template-columns:36px 1fr;gap:10px;padding:14px}
+.av{width:36px;height:36px;border-radius:50%;background:#0D0D0D;color:#fff;display:grid;place-items:center;font:800 13px var(--display);font-stretch:80%}
+.inbox .from{display:flex;justify-content:space-between;font:600 14px var(--body)}
+.inbox .from span{font:400 12px var(--body);color:var(--papermute)}
+.inbox .s{font:600 15px/1.3 var(--body);overflow-wrap:anywhere}
+.inbox .p{font-size:13.5px;color:var(--papermute);line-height:1.35}
+.hero{background:#0D0D0D;color:#fff;padding:28px 20px;display:grid;gap:10px;text-align:center}
+.hero .h{font:800 30px/.98 var(--display);font-stretch:72%;text-transform:uppercase;text-wrap:balance}
+.hero .sub{font-size:14px;color:#cfcbc8}
+.btn{justify-self:center;background:#FF0000;color:#fff;font:700 13px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:12px 20px;border-radius:3px}
+.bodycopy{padding:20px;font-size:15.5px;line-height:1.55;display:grid;gap:10px}
+.bodycopy p{margin:0}
+.bodycopy ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.mail .hd{background:#0D0D0D;color:#fff;padding:10px 14px;font:800 14px var(--display);font-stretch:80%;text-transform:uppercase;letter-spacing:.03em}
+.mail.plain .hd{display:none}
+.mail .bd{padding:18px;display:grid;gap:10px;font-size:14.5px;line-height:1.5}
+.mail .bd p{margin:0}
+.mail .bd .h{font:800 26px/.98 var(--display);font-stretch:72%;text-transform:uppercase;text-align:center}
+.mail .bd .btn{margin-top:4px}
+.mail.plain .bd{font-family:Georgia,"Times New Roman",serif;font-size:15px}
+.mail.plain a{color:#1a55c4}
+.ctas{padding:26px 16px;display:grid;place-items:center;background:#F5F3F3}
+.ctas .btn{font-size:14px;padding:14px 26px}
+.foot{font-size:11.5px;color:var(--mute)}
+.alt{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{all:unset;cursor:pointer;font:500 13px var(--body);border:1px solid var(--rule);color:var(--ink);padding:9px 14px;border-radius:999px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+label.nl{display:grid;gap:6px;font:500 13px var(--body);color:var(--mute)}
+textarea,input[type=text]{width:100%;background:var(--panel);border:1px solid var(--rule);color:var(--ink);font:15px/1.45 var(--body);padding:10px 12px;border-radius:6px;resize:vertical}
+textarea:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-offset:1px}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:18px}
+.go{all:unset;cursor:pointer;background:var(--red);color:var(--redink);font:700 14px var(--body);letter-spacing:.05em;text-transform:uppercase;padding:13px 22px;border-radius:4px}
+.go[disabled]{opacity:.35;cursor:not-allowed}
+.ghost{all:unset;cursor:pointer;color:var(--mute);font:500 14px var(--body);padding:13px 4px}
+.go:focus-visible,.ghost:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.sum{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--rule);min-width:0}
+.row .n{font:500 12px var(--mono);color:var(--mute);font-variant-numeric:tabular-nums}
+.row .t{min-width:0}
+.row .t small{display:block;color:var(--mute);font-size:13px}
+.row .k{font:600 13px var(--body);color:var(--ink);text-align:right}
+.row .k.none{color:var(--mute);font-weight:400}
+.status{font:500 13px var(--mono);color:var(--mute)}
+.status.ok{color:#5fd38d}
+.status.err{color:#ff8a7a}
+.opens{display:grid;gap:16px}
+.ctxrow{display:flex;flex-wrap:wrap;gap:8px}
+.cx{display:inline-flex;gap:8px;align-items:baseline;background:var(--panel);border:1px solid var(--rule);border-radius:999px;padding:6px 12px;font:500 13px var(--body);color:var(--ink);min-width:0}
+.cx i{font:500 10.5px var(--mono);font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:var(--red)}
+.sms{background:#F2F2F7;padding:18px 16px;display:grid;gap:8px}
+.smsfrom{font:500 12px var(--body);color:var(--papermute);text-align:center}
+.bub{background:#E5E5EA;color:#111;border-radius:18px 18px 18px 4px;padding:10px 14px;font-size:15px;line-height:1.4;max-width:88%}
+.why{display:grid;gap:6px;background:var(--panel);border:1px solid var(--rule);border-left:3px solid var(--red);border-radius:6px;padding:14px 16px}
+.why p{margin:0;font-size:15px;line-height:1.5;max-width:70ch}
+.why p b{color:var(--ink);font-weight:600}
+.why .wt{font:800 22px/1 var(--display);font-stretch:75%;text-transform:uppercase;letter-spacing:.01em}
+@media (prefers-reduced-motion:no-preference){.why:not([hidden]){animation:whyIn .25s ease}}
+@keyframes whyIn{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.bar i,.opt{transition:none}}
+</style>
+
+<div class="wrap" id="app">
+  <div class="top"><div class="logo">Male<b>MD</b> · Voice quiz</div><div class="prog" id="prog"><span id="progT">Intro</span><span class="bar"><i id="progBar"></i></span></div></div>
+  <main id="screen"></main>
+</div>
+
+<script>
+const PAIRS=[
+ {id:'subj-lapsed',aud:'Lapsed Alpha customers',moment:'Alpha+ relaunch email',el:'Subject line',q:'Which subject line gets a lapsed Alpha customer to open?',type:'inbox',
+  a:{trait:'Clarity',s:'Alpha+ is here. Hard in about 15 minutes.*',p:'The 4-in-1 mint for arousal and blood flow.'},
+  b:{trait:'Curiosity',s:'We rebuilt the mint you used to take',p:'Two new actives. One you\'ll feel before anything else.'}},
+ {id:'subj-new',aud:'New prospect, never ordered',moment:'Abandoned questionnaire, day 1',el:'Subject line',q:'Which subject line gets him back to finish?',type:'inbox',
+  a:{trait:'Curiosity',s:'Still thinking it over?',p:'Most guys have the same three questions.'},
+  b:{trait:'Clarity',s:'Your KnockoutRx questionnaire is saved',p:'A licensed doctor can review it today.'}},
+ {id:'hero-new',aud:'New prospect, never ordered',moment:'Abandoned questionnaire, day 2',el:'Email hero',q:'Which headline sounds more like MaleMD to someone who has never ordered?',type:'hero',
+  a:{trait:'Bold',h:'Sex ready 24/7. No timing. No waiting.',sub:'One daily capsule. Three blood flow ingredients.',btn:'Finish My Questionnaire'},
+  b:{trait:'Clinical',h:'Daily ED treatment that works on your schedule.',sub:'Prescribed online by a licensed U.S. doctor.',btn:'Finish My Questionnaire'}},
+ {id:'hero-peptide',aud:'Existing ED customers',moment:'Exclusive peptide launch',el:'Email hero',q:'Which headline introduces Sermorelin to men who already buy from you?',type:'hero',
+  a:{trait:'Grounded',h:'Support your body\'s own growth hormone.',sub:'Sermorelin, prescribed by the same MaleMD doctors.',btn:'See If It\'s Right For Me'},
+  b:{trait:'Hype',h:'Shred fat. Build muscle. Feel 30 again.',sub:'Doctor-prescribed Sermorelin, patients first.',btn:'See If It\'s Right For Me'}},
+ {id:'explicit-email',aud:'Lapsed Alpha customers',moment:'Alpha+ relaunch email',el:'Body line',q:'How explicit should the email body be?',type:'body',
+  a:{trait:'Discreet',p:['Better nights. More confidence. Feel like yourself again.']},
+  b:{trait:'Explicit',p:['Harder, thicker erections, and the desire to go with them.']}},
+ {id:'explicit-sms',aud:'Existing customers, SMS subscribers',moment:'Black Friday',el:'Text message',q:'Which text would you send?',type:'sms',
+  a:{trait:'Explicit',t:'MaleMD: Stay hard-ready 24/7 for less. Black Friday pricing on KnockoutRx is live. malemd.com/bf'},
+  b:{trait:'Discreet',t:'MaleMD: Black Friday pricing on KnockoutRx is live. Our lowest price of the year. malemd.com/bf'}},
+ {id:'story-new',aud:'New prospect, never ordered',moment:'Abandoned questionnaire, day 3',el:'Body copy',q:'Which gets a hesitant first-timer over the line?',type:'body',
+  a:{trait:'Science',p:['KnockoutRx pairs a daily dose of tadalafil with vardenafil.','Blood flow stays primed all day, and responds the moment you need it.']},
+  b:{trait:'Story',p:['Most guys wait. They tell themselves it\'s stress, or temporary, and months go by.','You already took the first step. Finish it.']}},
+ {id:'story-lapsed',aud:'Lapsed Alpha customers',moment:'Alpha+ relaunch, follow-up',el:'Body copy',q:'Which explains why Alpha+ is worth coming back for?',type:'body',
+  a:{trait:'Story',p:['Most guys don\'t talk about the part where you stop initiating. The worry about whether it\'ll work turns into the reason you don\'t try.','Alpha+ was built for that moment, not just the blood flow.']},
+  b:{trait:'Science',p:['Four actives in one dissolvable mint:'],ul:['Sildenafil for fast onset','Tadalafil for a 36-hour window','Apomorphine for desire','Oxytocin for connection']}},
+ {id:'format-new',aud:'New prospect, never ordered',moment:'Abandoned questionnaire, day 1',el:'Full email',q:'Which email would you rather send?',type:'mail',
+  a:{trait:'Branded',plain:false,h:'Stop planning around a pill.',p:['Your physician is ready to review your case today.'],btn:'Finish My Questionnaire'},
+  b:{trait:'Personal',plain:true,p:['Hi Mike,','Quick note from the MaleMD care team. Your questionnaire is saved right where you left it, and a doctor can review it today.','<a>Pick up where you left off</a>','The MaleMD Care Team']}},
+ {id:'format-cancel',aud:'Customer who just canceled',moment:'Cancellation follow-up, day 2',el:'Full email',q:'Which email would you send after he cancels?',type:'mail',
+  a:{trait:'Personal',plain:true,p:['Hi Mike,','Saw you canceled your KnockoutRx plan. No hard sell here.','If something wasn\'t working, just reply and tell us. Your doctor can adjust your dose or switch your treatment.','The MaleMD Care Team']},
+  b:{trait:'Branded',plain:false,h:'Your plan is paused, not gone.',p:['Your doctor and your treatment history are saved. Restart anytime.'],btn:'Restart My Plan'}},
+ {id:'urgency-existing',aud:'Existing customers',moment:'BFCM cross-sell',el:'Body copy',q:'How hard should Black Friday push your current patients?',type:'body',
+  a:{trait:'Value',p:['As a MaleMD patient, you get first access to Black Friday pricing on Sermorelin and NAD+.','Live through Cyber Monday.']},
+  b:{trait:'Scarcity',p:['Patient-only Black Friday pricing ends at midnight.','Once it\'s gone, it\'s gone.']}},
+ {id:'urgency-cold',aud:'Signed up, never bought, 15+ days cold',moment:'BFCM first-purchase offer',el:'Subject line',q:'Which subject line wakes up a cold lead?',type:'inbox',
+  a:{trait:'Scarcity',s:'Up to 70% off. Ends at midnight.',p:'Your first order, our lowest price of the year.'},
+  b:{trait:'Value',s:'Our best first-order price of the year',p:'Up to 70% off your first MaleMD treatment, through Cyber Monday.'}},
+ {id:'proof-new',aud:'New prospect, never ordered',moment:'Abandoned questionnaire, day 4',el:'Social proof',q:'Which proof point lands harder with a skeptic?',type:'body',
+  a:{trait:'One voice',p:['"KnockoutRx is a game changer. I switched from Viagra and have never looked back to having to time a pill."','Bill S., Verified Patient']},
+  b:{trait:'Big numbers',p:['100,000+ men. 4.8 stars on Trustpilot. Prescribed by licensed U.S. doctors.']}},
+ {id:'proof-peptide',aud:'Existing ED customers',moment:'Exclusive peptide launch',el:'Trust line',q:'Which reason to trust Sermorelin fits your current patients?',type:'body',
+  a:{trait:'Relationship',p:['You already trust your MaleMD doctor with your ED treatment.','The same doctors now prescribe Sermorelin.']},
+  b:{trait:'Big numbers',p:['100,000+ men nationwide trust MaleMD.','Compounded in FDA-registered U.S. pharmacies.']}},
+ {id:'wink-lapsed',aud:'Lapsed Alpha customers',moment:'Alpha+ relaunch email',el:'Callout',q:'Room for a wink with men who already know you?',type:'hero',
+  a:{trait:'Straight',h:'Active for up to 36 hours.*',sub:'One mint. Fast onset. Long window.',btn:'See If It\'s Right For Me'},
+  b:{trait:'Wink',h:'Round two? Covered.',sub:'Up to 36 hours from one mint.*',btn:'See If It\'s Right For Me'}},
+ {id:'wink-bfcm',aud:'Existing customers',moment:'Black Friday',el:'Subject line',q:'Which Black Friday subject line would you send?',type:'inbox',
+  a:{trait:'Wink',s:'Black Friday deals that last up to 36 hours*',p:'Our lowest prices of the year on Alpha+ and KnockoutRx.'},
+  b:{trait:'Straight',s:'Black Friday: our lowest prices of the year',p:'Alpha+, KnockoutRx and more, through Cyber Monday.'}},
+ {id:'partner-new',aud:'New prospect, never ordered',moment:'Abandoned questionnaire',el:'Email hero',q:'Who is this copy about?',type:'hero',
+  a:{trait:'Partner',h:'Your partner will notice. So will you.',sub:'Daily treatment. Always ready.',btn:'Finish My Questionnaire'},
+  b:{trait:'Self',h:'Feel like yourself again.',sub:'Daily treatment. Always ready.',btn:'Finish My Questionnaire'}},
+ {id:'partner-lapsed',aud:'Lapsed Alpha customers',moment:'Alpha+ relaunch, follow-up',el:'Subject line',q:'Which subject line would you send a lapsed customer?',type:'inbox',
+  a:{trait:'Self',s:'Get your edge back',p:'Alpha+ works on desire and blood flow.'},
+  b:{trait:'Partner',s:'Date night just got an upgrade',p:'Alpha+ works on desire and blood flow.'}},
+ {id:'competitors',aud:'Lapsed Alpha customers',moment:'Alpha+ relaunch email',el:'Positioning line',q:'Should we name the big brands?',type:'body',
+  a:{trait:'Borrowed',p:['The actives behind Viagra® and Cialis®, plus two your pharmacy has never offered.']},
+  b:{trait:'Owned',p:['A different kind of ED treatment. One that starts in the brain.']}},
+ {id:'churn-first',aud:'Active customer',moment:'Clicks cancel, first screen',el:'Save message',q:'What should he see the moment he clicks cancel?',type:'body',
+  a:{trait:'Offer',p:['Before you cancel: your next month is on us.','Stay on your plan and we\'ll cover the next shipment.']},
+  b:{trait:'Listen',p:['Before you cancel, tell us what isn\'t working.','Your doctor can adjust your dose or switch your treatment. Most fixes take one message.']}},
+ {id:'churn-last',aud:'Canceled 30+ days ago',moment:'Final win-back email',el:'Body copy',q:'What\'s the last thing we say before we stop emailing?',type:'body',
+  a:{trait:'Listen',p:['We\'d rather know than guess.','Two quick questions: what made you stop, and what would bring you back?']},
+  b:{trait:'Offer',p:['Come back at your old price, locked for as long as you stay on treatment.','This is the last time we\'ll offer it.']}},
+ {id:'cta',aud:'New prospect, never ordered',moment:'Abandoned questionnaire',el:'Button',q:'Which button would you rather click?',type:'cta',
+  a:{trait:'Process',btn:'Finish My Questionnaire'},
+  b:{trait:'Outcome',btn:'Claim My Plan'}},
+ {id:'emoji',aud:'Any audience',moment:'Any campaign',el:'Subject line style',q:'Emoji in subject lines?',type:'inbox',
+  a:{trait:'Emoji',s:'⚡ Alpha+ is live',p:'Arousal you can feel.'},
+  b:{trait:'Plain',s:'Alpha+ is live',p:'Arousal you can feel.'}}
+];
+const ORDER=['subj-lapsed','hero-new','explicit-email','story-new','format-new','urgency-existing','proof-new','wink-lapsed','partner-new','churn-first','competitors','cta','hero-peptide','subj-new','explicit-sms','format-cancel','story-lapsed','urgency-cold','wink-bfcm','proof-peptide','partner-lapsed','emoji','churn-last'];
+PAIRS.sort((x,y)=>ORDER.indexOf(x.id)-ORDER.indexOf(y.id));
+PAIRS.forEach(p=>p.ctx=`${p.aud} · ${p.moment} · ${p.el}`);
+const WHY={
+ 'subj-lapsed':{t:'Clarity vs. curiosity',a:'Says exactly what it is. He already knows Alpha, so the news does the work.',b:'Earns the open with intrigue. Useful if he has stopped opening.'},
+ 'subj-new':{t:'Curiosity vs. clarity',a:'Opens a conversation. Works when hesitation, not forgetting, is the blocker.',b:'A plain reminder. Works when he simply got distracted.'},
+ 'hero-new':{t:'Bold vs. clinical',a:'Sells the outcome hard, like your Meta ads. He came in from that ad.',b:'Builds trust with a first-timer, like Ro and Keeps.'},
+ 'hero-peptide':{t:'Grounded vs. hype',a:'Leans on the doctor relationship he already has.',b:'Matches your Sermorelin ads. Strong for men who want the transformation.'},
+ 'explicit-email':{t:'Discreet vs. explicit',a:'Implies the result. Reads fine in an inbox preview.',b:'Names the result, like your ads and the Alpha+ page.'},
+ 'explicit-sms':{t:'Explicit vs. discreet',a:'Direct and memorable, but SMS carriers can filter explicit terms.',b:'Safer for delivery and on a lock screen. Lets the price do the work.'},
+ 'story-new':{t:'Science vs. story',a:'Answers "how is this different" for a skeptic.',b:'Names the real blocker: waiting and hoping it fixes itself.'},
+ 'story-lapsed':{t:'Story vs. science',a:'Speaks to the anxiety behind ED.',b:'Shows what changed since he left. Gives him a reason to retry.'},
+ 'format-new':{t:'Branded vs. personal',a:'Builds the brand and shows the product.',b:'Reads like a note from a person. Tends to get more replies.'},
+ 'format-cancel':{t:'Personal vs. branded',a:'Feels like a human checking in. Invites the real reason he left.',b:'Makes coming back feel easy and low-commitment.'},
+ 'urgency-existing':{t:'Value vs. scarcity',a:'Rewards loyalty and protects your price after BFCM.',b:'Drives fast action, but can wear out patients you want to keep.'},
+ 'urgency-cold':{t:'Scarcity vs. value',a:'A hard deadline is often what moves a cold lead.',b:'Leads with the deal and keeps the full window open.'},
+ 'proof-new':{t:'One voice vs. big numbers',a:'One real customer feels relatable.',b:'Scale signals legitimacy to someone who has never ordered.'},
+ 'proof-peptide':{t:'Relationship vs. big numbers',a:'Uses the trust he already has in his MaleMD doctor.',b:'Scale reassures him about a newer, less familiar treatment.'},
+ 'wink-lapsed':{t:'Straight vs. wink',a:'Stays clinical, like Rugiet and Keeps.',b:'Adds personality, like early Hims. He already knows you.'},
+ 'wink-bfcm':{t:'Wink vs. straight',a:'Stands out in a Black Friday inbox full of identical sales.',b:'Clean and clear. The price does the talking.'},
+ 'partner-new':{t:'Partner vs. self',a:'Raises the stakes through the relationship.',b:'Keeps it about his own confidence.'},
+ 'partner-lapsed':{t:'Self vs. partner',a:'Speaks to what he personally lost.',b:'Frames coming back as something he does for the relationship.'},
+ 'competitors':{t:'Borrowed vs. owned',a:'Uses names he already trusts.',b:'Makes Alpha+ its own category.'},
+ 'churn-first':{t:'Offer vs. listen',a:'Saves fast, but can train people to cancel for a discount.',b:'Fixes the real reason and protects margin.'},
+ 'churn-last':{t:'Listen vs. offer',a:'Gets data even if he never returns.',b:'Last chance is when a strong offer makes the most sense.'},
+ 'cta':{t:'Process vs. outcome',a:'Tells him exactly what happens next.',b:'Sells the result.'},
+ 'emoji':{t:'Emoji vs. plain',a:'Stands out in a crowded inbox.',b:'Looks cleaner and more clinical.'}
+};
+const OPENS=[
+ {id:'other',label:'Words, phrases, claims or brands you find aspirational. Or anything else on your mind.'}
+];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let state={step:-1,answers:{},opens:{}};
+try{const d=JSON.parse(localStorage.getItem('mmdq')||'null');if(d&&d.answers)state=Object.assign(state,d)}catch(e){}
+const save=()=>{try{localStorage.setItem('mmdq',JSON.stringify(state))}catch(e){}};
+
+function spec(type,o){
+  if(type==='inbox')return `<div class="spec inbox"><div class="av">MD</div><div style="min-width:0;display:grid;gap:2px"><div class="from">MaleMD <span>9:14 AM</span></div><div class="s">${esc(o.s)}</div><div class="p">${esc(o.p)}</div></div></div>`;
+  if(type==='hero')return `<div class="spec hero"><div class="h">${esc(o.h)}</div><div class="sub">${esc(o.sub)}</div><span class="btn">${esc(o.btn)}</span></div>`;
+  if(type==='body')return `<div class="spec bodycopy">${o.p.map(x=>`<p>${esc(x)}</p>`).join('')}${o.ul?`<ul>${o.ul.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}</div>`;
+  if(type==='mail')return `<div class="spec mail${o.plain?' plain':''}"><div class="hd">MaleMD</div><div class="bd">${o.h?`<div class="h">${esc(o.h)}</div>`:''}${o.p.map(x=>x.startsWith('<a>')?`<p><a>${esc(x.slice(3,-4))}</a></p>`:`<p>${esc(x)}</p>`).join('')}${o.btn?`<span class="btn">${esc(o.btn)}</span>`:''}</div></div>`;
+  if(type==='sms')return `<div class="spec sms"><div class="smsfrom">MaleMD · Text Message</div><div class="bub">${esc(o.t)}</div></div>`;
+  if(type==='cta')return `<div class="spec ctas"><span class="btn">${esc(o.btn)}</span></div>`;
+}
+function setProg(){
+  const n=PAIRS.length,s=state.step;
+  document.getElementById('progT').textContent=s<0?'Intro':s>=n?(s===n?'Last questions':'Done'):`${String(s+1).padStart(2,'0')} / ${n}`;
+  document.getElementById('progBar').style.width=Math.max(0,Math.min(1,(s+1)/(n+1)))*100+'%';
+}
+const el=document.getElementById('screen');
+function render(){
+  setProg();window.scrollTo(0,0);
+  const n=PAIRS.length,s=state.step;
+  if(s<0)return intro();
+  if(s<n)return pair(PAIRS[s]);
+  if(s===n)return opens();
+  return done();
+}
+function intro(){
+  el.innerHTML=`<div style="display:grid;gap:22px">
+   <div class="eyebrow">For Robert · ${PAIRS.length} questions · About 7 minutes</div>
+   <h1>How should <em>MaleMD</em> sound?</h1>
+   <p class="lede">A quick tone exercise. Your picks help train the AI I write with, so drafts sound like MaleMD from the start.</p>
+   <ul class="how">
+    <li><b>Pick the one you'd send</b><span>Go with your gut.</span></li>
+    <li><b>Both or neither is fine</b><span>Add a note if you want.</span></li>
+    <li><b>Some repeat on purpose</b><span>The audience changes the answer.</span></li>
+   </ul>
+   <div class="nav" style="border:0;padding:0"><span></span><button class="go" id="start">${Object.keys(state.answers).length?'Pick up where I left off':'Start'}</button></div></div>`;
+  document.getElementById('start').onclick=()=>{state.step=Object.keys(state.answers).length?Math.min(PAIRS.findIndex(p=>!state.answers[p.id]?.pick)>=0?PAIRS.findIndex(p=>!state.answers[p.id]?.pick):PAIRS.length,PAIRS.length):0;save();render()};
+}
+function pair(p){
+  const a=state.answers[p.id]||{};
+  el.innerHTML=`<div style="display:grid;gap:20px">
+   <div class="q"><div class="ctxrow"><span class="cx"><i>Audience</i>${esc(p.aud)}</span><span class="cx"><i>Moment</i>${esc(p.moment)}</span><span class="cx"><i>Showing</i>${esc(p.el)}</span></div><h2>${esc(p.q)}</h2></div>
+   <div class="pair">
+    ${['a','b'].map(k=>`<button class="opt" data-k="${k}" aria-pressed="${a.pick===k}" id="opt-${k}"><div class="lab"><span>Option ${k.toUpperCase()}</span><span class="chk" aria-hidden="true">✓</span></div>${spec(p.type,p[k])}</button>`).join('')}
+   </div>
+   <div class="alt" role="group" aria-label="Other answers">
+    <button class="chip" data-k="both" aria-pressed="${a.pick==='both'}" id="c-both">Both work</button>
+    <button class="chip" data-k="neither" aria-pressed="${a.pick==='neither'}" id="c-neither">Neither</button>
+   </div>
+   <div class="why" id="why" role="status" ${a.pick?'':'hidden'}><span class="eyebrow"><b>The strategy</b></span><div class="wt">${esc(WHY[p.id].t)}</div><p><b>A:</b> ${esc(WHY[p.id].a)}</p><p><b>B:</b> ${esc(WHY[p.id].b)}</p></div>
+   <label class="nl" for="note">Note (optional). What you'd change, or why.<textarea id="note" rows="2" placeholder="e.g. A, but less aggressive">${esc(a.note||'')}</textarea></label>
+   <div class="nav"><button class="ghost" id="back">← Back</button><button class="go" id="next" ${a.pick?'':'disabled'}>Next</button></div></div>`;
+  const pick=k=>{state.answers[p.id]=Object.assign(state.answers[p.id]||{},{pick:k});save();
+    el.querySelectorAll('[data-k]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));document.getElementById('next').disabled=false;document.getElementById('why').hidden=false};
+  el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>pick(b.dataset.k));
+  document.getElementById('note').oninput=e=>{state.answers[p.id]=Object.assign(state.answers[p.id]||{},{note:e.target.value});save()};
+  document.getElementById('back').onclick=()=>{state.step--;save();render()};
+  document.getElementById('next').onclick=()=>{state.step++;save();sync(false);render()};
+}
+function opens(){
+  el.innerHTML=`<div style="display:grid;gap:20px">
+   <div class="q"><div class="eyebrow"><b>Last step · optional</b></div><h2>Anything else you want to mention?</h2></div>
+   <div class="opens">${OPENS.map(o=>`<label class="nl" for="o-${o.id}">${esc(o.label)}<textarea id="o-${o.id}" rows="6">${esc(state.opens[o.id]||'')}</textarea></label>`).join('')}</div>
+   <div class="nav"><button class="ghost" id="back">← Back</button><button class="go" id="submit">Submit</button></div></div>`;
+  OPENS.forEach(o=>document.getElementById('o-'+o.id).oninput=e=>{state.opens[o.id]=e.target.value;save()});
+  document.getElementById('back').onclick=()=>{state.step--;save();render()};
+  document.getElementById('submit').onclick=async()=>{state.step++;state.submitted=true;save();render();await sync(true)};
+}
+const label=(p,k)=>k==='a'||k==='b'?`${k.toUpperCase()} · ${p[k].trait}`:k==='both'?'Both work':k==='neither'?'Neither':'Skipped';
+function resultsText(){
+  const L=['MaleMD voice quiz results',''];
+  PAIRS.forEach((p,i)=>{const a=state.answers[p.id]||{};L.push(`${i+1}. ${p.ctx}: ${label(p,a.pick)}${a.note?` (note: ${a.note})`:''}`)});
+  L.push('');OPENS.forEach(o=>{if(state.opens[o.id])L.push(`${o.label}: ${state.opens[o.id]}`)});
+  return L.join('\n');
+}
+function done(){
+  el.innerHTML=`<div style="display:grid;gap:20px">
+   <div class="eyebrow"><b>Done</b></div><h1>Thanks, <em>Robert.</em></h1>
+   <p class="lede">Here's what you picked. Kaylyn will turn this into the MaleMD voice guide and use it on every draft.</p>
+   <div class="status" id="st" role="status">Saving…</div>
+   <div class="sum">${PAIRS.map((p,i)=>{const a=state.answers[p.id]||{};return `<div class="row"><span class="n">${String(i+1).padStart(2,'0')}</span><span class="t">${esc(p.ctx)}${a.note?`<small>${esc(a.note)}</small>`:''}</span><span class="k${a.pick?'':' none'}">${esc(label(p,a.pick))}</span></div>`}).join('')}</div>
+   <div class="nav"><button class="ghost" id="edit">← Change answers</button><button class="go" id="copy">Copy my answers</button></div>
+   <p class="foot" id="cpst"></p></div>`;
+  document.getElementById('edit').onclick=()=>{state.step=0;save();render()};
+  document.getElementById('copy').onclick=async()=>{const t=resultsText(),c=document.getElementById('cpst');
+    try{await navigator.clipboard.writeText(t);c.textContent='Copied. Paste it into a reply to Kaylyn if you like.'}catch(e){c.textContent='Copy was blocked here. Select the list above and copy it instead.'}};
+}
+const FORM='https://docs.google.com/forms/d/e/1FAIpQLSfRgWLusT5iSDwOk7I9XHID5Nb1-JPeqoyFjYww2Nw0zLpu-Q/formResponse';
+const F={session:'entry.1596762017',status:'entry.1578207017',answers:'entry.1037937472',other:'entry.1121538626',raw:'entry.471080508'};
+if(!state.sid){state.sid='R-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);save()}
+async function sync(final){
+  const st=document.getElementById('st');
+  const done=PAIRS.filter(p=>state.answers[p.id]?.pick).length;
+  const body=new URLSearchParams();
+  body.set(F.session,state.sid);
+  body.set(F.status,final?`Submitted (${done}/${PAIRS.length})`:`In progress (${done}/${PAIRS.length})`);
+  body.set(F.answers,resultsText());
+  body.set(F.other,state.opens.other||'');
+  body.set(F.raw,JSON.stringify({sid:state.sid,answers:state.answers,opens:state.opens,submitted:!!final,at:new Date().toISOString()}));
+  try{
+    await fetch(FORM,{method:'POST',mode:'no-cors',body});
+    if(st){st.textContent='Saved. Kaylyn has your answers.';st.className='status ok'}
+  }catch(e){
+    if(st){st.textContent='Couldn\'t save automatically. Use "Copy my answers" and send them to Kaylyn.';st.className='status err'}
+  }
+}
+render();
+</script>
+
+</body></html>
