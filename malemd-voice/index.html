@@ -88,6 +88,7 @@ textarea:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-
 .row .t{min-width:0}
 .row .t small{display:block;color:var(--mute);font-size:13px}
 .row .k{font:600 13px var(--body);color:var(--ink);text-align:right}
+.row[data-i]{cursor:pointer}.row[data-i]:hover .t,.row[data-i]:focus-visible .t{color:var(--red)}.row[data-i]:focus-visible{outline:2px solid var(--red);outline-offset:2px}
 .row .k.none{color:var(--mute);font-weight:400}
 .status{font:500 13px var(--mono);color:var(--mute)}
 .status.ok{color:#5fd38d}
@@ -217,7 +218,7 @@ const OPENS=[
  {id:'other',label:'Words, phrases, claims or brands you find aspirational. Or anything else on your mind.'}
 ];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let state={step:-1,answers:{},opens:{}};
+let state={step:-1,answers:{},opens:{},name:''};
 try{const d=JSON.parse(localStorage.getItem('mmdq')||'null');if(d&&d.answers)state=Object.assign(state,d)}catch(e){}
 const save=()=>{try{localStorage.setItem('mmdq',JSON.stringify(state))}catch(e){}};
 
@@ -245,7 +246,7 @@ function render(){
 }
 function intro(){
   el.innerHTML=`<div style="display:grid;gap:22px">
-   <div class="eyebrow">For Robert · ${PAIRS.length} questions · About 7 minutes</div>
+   <div class="eyebrow">For ${esc(state.name||'the MaleMD team')} · ${PAIRS.length} questions · About 7 minutes</div>
    <h1>How should <em>MaleMD</em> sound?</h1>
    <p class="lede">A quick tone exercise. Your picks help train the AI I write with, so drafts sound like MaleMD from the start.</p>
    <ul class="how">
@@ -253,8 +254,11 @@ function intro(){
     <li><b>Both or neither is fine</b><span>Add a note if you want.</span></li>
     <li><b>Some repeat on purpose</b><span>The audience changes the answer.</span></li>
    </ul>
-   <div class="nav" style="border:0;padding:0"><span></span><button class="go" id="start">${Object.keys(state.answers).length?'Pick up where I left off':'Start'}</button></div></div>`;
-  document.getElementById('start').onclick=()=>{state.step=Object.keys(state.answers).length?Math.min(PAIRS.findIndex(p=>!state.answers[p.id]?.pick)>=0?PAIRS.findIndex(p=>!state.answers[p.id]?.pick):PAIRS.length,PAIRS.length):0;save();render()};
+   <label class="nl" for="who" style="max-width:360px">Your name<input type="text" id="who" autocomplete="name" value="${esc(state.name||'')}" placeholder="First name"></label>
+   <div class="nav" style="border:0;padding:0"><span></span><button class="go" id="start" ${state.name?'':'disabled'}>${Object.keys(state.answers).length?'Pick up where I left off':'Start'}</button></div></div>`;
+  const who=document.getElementById('who'),sb=document.getElementById('start');
+  who.oninput=()=>{state.name=who.value.trim();save();sb.disabled=!state.name};
+  document.getElementById('start').onclick=()=>{if(!state.name)return;state.step=Object.keys(state.answers).length?Math.min(PAIRS.findIndex(p=>!state.answers[p.id]?.pick)>=0?PAIRS.findIndex(p=>!state.answers[p.id]?.pick):PAIRS.length,PAIRS.length):0;save();render()};
 }
 function pair(p){
   const a=state.answers[p.id]||{};
@@ -269,13 +273,14 @@ function pair(p){
    </div>
    <div class="why" id="why" role="status" ${a.pick?'':'hidden'}><span class="eyebrow"><b>The strategy</b></span><div class="wt">${esc(WHY[p.id].t)}</div><p><b>A:</b> ${esc(WHY[p.id].a)}</p><p><b>B:</b> ${esc(WHY[p.id].b)}</p></div>
    <label class="nl" for="note">Note (optional). What you'd change, or why.<textarea id="note" rows="2" placeholder="e.g. A, but less aggressive">${esc(a.note||'')}</textarea></label>
-   <div class="nav"><button class="ghost" id="back">← Back</button><button class="go" id="next" ${a.pick?'':'disabled'}>Next</button></div></div>`;
+   <div class="nav"><button class="ghost" id="back">← Back</button>${state.submitted?'<button class="ghost" id="tosum">Back to summary</button>':''}<button class="go" id="next" ${a.pick?'':'disabled'}>Next</button></div></div>`;
+  if(state.submitted)document.getElementById('tosum').onclick=()=>{state.step=PAIRS.length;save();render()};
   const pick=k=>{state.answers[p.id]=Object.assign(state.answers[p.id]||{},{pick:k});save();
     el.querySelectorAll('[data-k]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));document.getElementById('next').disabled=false;document.getElementById('why').hidden=false};
   el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>pick(b.dataset.k));
   document.getElementById('note').oninput=e=>{state.answers[p.id]=Object.assign(state.answers[p.id]||{},{note:e.target.value});save()};
   document.getElementById('back').onclick=()=>{state.step--;save();render()};
-  document.getElementById('next').onclick=()=>{state.step++;save();if(state.step===12||state.step===PAIRS.length)sync(false);render()};
+  document.getElementById('next').onclick=()=>{state.step++;save();if(!state.submitted&&(state.step===12||state.step===PAIRS.length))sync(false);render()};
 }
 function opens(){
   el.innerHTML=`<div style="display:grid;gap:20px">
@@ -284,7 +289,7 @@ function opens(){
    <div class="nav"><button class="ghost" id="back">← Back</button><button class="go" id="submit">Submit</button></div></div>`;
   OPENS.forEach(o=>document.getElementById('o-'+o.id).oninput=e=>{state.opens[o.id]=e.target.value;save()});
   document.getElementById('back').onclick=()=>{state.step--;save();render()};
-  document.getElementById('submit').onclick=async()=>{state.step++;state.submitted=true;save();render();await sync(true)};
+  document.getElementById('submit').onclick=async()=>{state.step++;const again=!!state.submitted;state.submitted=true;state.submitCount=(state.submitCount||0)+1;state.savedAt='';save();render();await sync(true)};
 }
 const label=(p,k)=>k==='a'||k==='b'?`${k.toUpperCase()} · ${p[k].trait}`:k==='both'?'Both work':k==='neither'?'Neither':'Skipped';
 function resultsText(){
@@ -295,18 +300,21 @@ function resultsText(){
 }
 function done(){
   el.innerHTML=`<div style="display:grid;gap:20px">
-   <div class="eyebrow"><b>Done</b></div><h1>Thanks, <em>Robert.</em></h1>
-   <p class="lede">Here's what you picked. Kaylyn will turn this into the MaleMD voice guide and use it on every draft.</p>
-   <div class="status" id="st" role="status">Saving…</div>
-   <div class="sum">${PAIRS.map((p,i)=>{const a=state.answers[p.id]||{};return `<div class="row"><span class="n">${String(i+1).padStart(2,'0')}</span><span class="t">${esc(p.ctx)}${a.note?`<small>${esc(a.note)}</small>`:''}</span><span class="k${a.pick?'':' none'}">${esc(label(p,a.pick))}</span></div>`}).join('')}</div>
-   <div class="nav"><button class="ghost" id="edit">← Change answers</button><button class="go" id="copy">Copy my answers</button></div>
+   <div class="eyebrow"><b>Done</b></div><h1>Thanks${state.name?', <em>'+esc(state.name)+'.</em>':'.'}</h1>
+   <p class="lede">Here's what you picked. Tap any answer to change it, then submit again.</p>
+   <div class="status${state.savedAt?' ok':''}" id="st" role="status">${state.savedAt?'Saved. Kaylyn has your answers.':'Saving…'}</div><button class="ghost" id="retry" hidden>Try saving again</button>
+   <div class="sum">${PAIRS.map((p,i)=>{const a=state.answers[p.id]||{};return `<div class="row" data-i="${i}" role="button" tabindex="0" title="Change this answer"><span class="n">${String(i+1).padStart(2,'0')}</span><span class="t">${esc(p.ctx)}${a.note?`<small>${esc(a.note)}</small>`:''}</span><span class="k${a.pick?'':' none'}">${esc(label(p,a.pick))}</span></div>`}).join('')}</div>
+   <div class="nav"><button class="ghost" id="edit">← Start over from question 1</button><button class="go" id="copy">Copy my answers</button></div>
    <p class="foot" id="cpst"></p></div>`;
   document.getElementById('edit').onclick=()=>{state.step=0;save();render()};
+  document.getElementById('retry').onclick=()=>{document.getElementById('st').textContent='Saving…';document.getElementById('st').className='status';sync(true)};
+  el.querySelectorAll('.row[data-i]').forEach(r=>{const go=()=>{state.step=+r.dataset.i;save();render()};r.onclick=go;r.onkeydown=e=>{if(e.key==='Enter')go()}});
   document.getElementById('copy').onclick=async()=>{const t=resultsText(),c=document.getElementById('cpst');
     try{await navigator.clipboard.writeText(t);c.textContent='Copied. Paste it into a reply to Kaylyn if you like.'}catch(e){c.textContent='Copy was blocked here. Select the list above and copy it instead.'}};
 }
 const FORM='https://docs.google.com/forms/d/e/1FAIpQLSfRgWLusT5iSDwOk7I9XHID5Nb1-JPeqoyFjYww2Nw0zLpu-Q/formResponse';
 const F={session:'entry.1596762017',status:'entry.1578207017',answers:'entry.1037937472',other:'entry.1121538626',raw:'entry.471080508'};
+try{const n=new URLSearchParams(location.search).get('n');if(n&&!state.name){state.name=n.slice(0,40);save()}}catch(e){}
 if(!state.sid){state.sid='R-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);save()}
 let lastSent='';
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!state.submitted&&Object.keys(state.answers).length)sync(false,true)});
@@ -314,19 +322,20 @@ async function sync(final,leaving){
   const st=document.getElementById('st');
   const done=PAIRS.filter(p=>state.answers[p.id]?.pick).length;
   const body=new URLSearchParams();
-  body.set(F.session,state.sid);
-  body.set(F.status,final?`Submitted (${done}/${PAIRS.length})`:`In progress (${done}/${PAIRS.length})`);
+  body.set(F.session,`${state.name||'(no name)'} · ${state.sid}`);
+  body.set(F.status,final?(state.submitCount>1?`Resubmitted #${state.submitCount} (${done}/${PAIRS.length})`:`Submitted (${done}/${PAIRS.length})`):`In progress (${done}/${PAIRS.length})`);
   body.set(F.answers,resultsText());
   body.set(F.other,state.opens.other||'');
-  body.set(F.raw,JSON.stringify({sid:state.sid,answers:state.answers,opens:state.opens,submitted:!!final,at:new Date().toISOString()}));
+  body.set(F.raw,JSON.stringify({name:state.name,sid:state.sid,submitCount:state.submitCount||0,answers:state.answers,opens:state.opens,submitted:!!final,at:new Date().toISOString()}));
   const sig=body.get(F.raw).replace(/"at":"[^"]*"/,'');
   if(sig===lastSent&&!final)return;
   try{
     await fetch(FORM,{method:'POST',mode:'no-cors',body,keepalive:!!leaving});
-    lastSent=sig;
-    if(st){st.textContent='Saved. Kaylyn has your answers.';st.className='status ok'}
+    lastSent=sig;if(final){state.savedAt=new Date().toISOString();save()}
+    if(st){st.textContent='Saved. Kaylyn has your answers.';st.className='status ok';const rb=document.getElementById('retry');if(rb)rb.hidden=true}
   }catch(e){
-    if(st){st.textContent='Couldn\'t save automatically. Use "Copy my answers" and send them to Kaylyn.';st.className='status err'}
+    if(final){state.savedAt='';save()}
+    if(st){st.textContent='Couldn\'t save. Check your connection and try again, or use "Copy my answers" and email them to Kaylyn.';st.className='status err';const rb=document.getElementById('retry');if(rb)rb.hidden=false}
   }
 }
 render();
