@@ -275,7 +275,7 @@ function pair(p){
   el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>pick(b.dataset.k));
   document.getElementById('note').oninput=e=>{state.answers[p.id]=Object.assign(state.answers[p.id]||{},{note:e.target.value});save()};
   document.getElementById('back').onclick=()=>{state.step--;save();render()};
-  document.getElementById('next').onclick=()=>{state.step++;save();sync(false);render()};
+  document.getElementById('next').onclick=()=>{state.step++;save();if(state.step===12||state.step===PAIRS.length)sync(false);render()};
 }
 function opens(){
   el.innerHTML=`<div style="display:grid;gap:20px">
@@ -308,7 +308,9 @@ function done(){
 const FORM='https://docs.google.com/forms/d/e/1FAIpQLSfRgWLusT5iSDwOk7I9XHID5Nb1-JPeqoyFjYww2Nw0zLpu-Q/formResponse';
 const F={session:'entry.1596762017',status:'entry.1578207017',answers:'entry.1037937472',other:'entry.1121538626',raw:'entry.471080508'};
 if(!state.sid){state.sid='R-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);save()}
-async function sync(final){
+let lastSent='';
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!state.submitted&&Object.keys(state.answers).length)sync(false,true)});
+async function sync(final,leaving){
   const st=document.getElementById('st');
   const done=PAIRS.filter(p=>state.answers[p.id]?.pick).length;
   const body=new URLSearchParams();
@@ -317,8 +319,11 @@ async function sync(final){
   body.set(F.answers,resultsText());
   body.set(F.other,state.opens.other||'');
   body.set(F.raw,JSON.stringify({sid:state.sid,answers:state.answers,opens:state.opens,submitted:!!final,at:new Date().toISOString()}));
+  const sig=body.get(F.raw).replace(/"at":"[^"]*"/,'');
+  if(sig===lastSent&&!final)return;
   try{
-    await fetch(FORM,{method:'POST',mode:'no-cors',body});
+    await fetch(FORM,{method:'POST',mode:'no-cors',body,keepalive:!!leaving});
+    lastSent=sig;
     if(st){st.textContent='Saved. Kaylyn has your answers.';st.className='status ok'}
   }catch(e){
     if(st){st.textContent='Couldn\'t save automatically. Use "Copy my answers" and send them to Kaylyn.';st.className='status err'}
